@@ -846,7 +846,6 @@ function buildPlanets(){
     const a=Math.random()*Math.PI*2,d=40+Math.random()*(Math.min(W,H)*.43);
     planets.push({x:W/2+Math.cos(a)*d,y:H/2+Math.sin(a)*d,type:PT[Math.floor(Math.random()*PT.length)],r:2+Math.random()*2.4,name:PN[i%PN.length],sector:['Éfidas','Valdis','Lacaille','Mirin','Aurora Bay','Sol Central'][Math.floor(Math.random()*6)],threat:['BAJA','MEDIA','ALTA','CRÍTICA'][Math.floor(Math.random()*4)]});
   }
-  const W=cv.width,H=cv.height;
   planets.push({x:W/2,y:H/2,type:'superearth',r:10,name:'SÚPER TIERRA',sector:'Sol Central',threat:'NINGUNA'});
   planets.push({x:W/2-W*.15,y:H/2-H*.12,type:'cyberstan',r:7,name:'CYBERSTAN',sector:'Lacaille',threat:'MUY ALTA'});
   planets.push({x:W/2+W*.18,y:H/2-H*.08,type:'illuminate',r:5,name:'VARYLIA 5',sector:'Exterior',threat:'DESCONOCIDA'});
@@ -1014,14 +1013,25 @@ PROPS.forEach(p=>{pg2.innerHTML+=`<div class="pc ${p.cls}"><span class="pp">${p.
 
 // ─── TERMINAL ───
 const CMDS={
-  help:()=>[{t:'ts',m:'Comandos disponibles:'},...['status','planets','factions','mission list','lore','helldiver','democracy','clear'].map(c=>({t:'tl2',m:'  '+c}))],
+  help:()=>[{t:'ts',m:'Comandos disponibles:'},...['status','planets','factions','mission list','stratagems','bestiary','intel','lore','helldiver','democracy','propaganda','armory','codex','leaderboard','classified','time','version','motd','clear'].map(c=>({t:'tl2',m:'  '+c}))],
   status:()=>[{t:'ts',m:'ESTADO DEL SISTEMA'},{t:'tl2',m:'Guerra Galáctica II: ACTIVA'},{t:'tl2',m:'Helldivers operativos: 842,331'},{t:'tl2',m:'Malevelon Creek: ASEDIADO'},{t:'tl2',m:'E-710 reservas: 43%'},{t:'te',m:'⚠ Brigada Jet detectada en Sector Valdis'}],
   planets:()=>[{t:'ts',m:'PLANETAS BAJO CONTROL SE (selección):'},...['Heeth','Fenix Prime','Menkent','Vernen Wells','Acamar','Turing'].map((p,i)=>({t:'tl2',m:`[${i+1}] ${p}`}))],
   factions:()=>[{t:'ts',m:'FACCIONES ACTIVAS:'},{t:'tl2',m:'• Terminidos: 78 planetas — ALTA'},{t:'te',m:'• Autómatas: 91 planetas — CRÍTICA'},{t:'tl2',m:'• Illuminados: ~12 detectados — MEDIA'}],
   'mission list':()=>MISSIONS.map((m,i)=>({t:i%2===0?'tl2':'ts',m:`[${i+1}] ${m.title} — ${m.planet} (D${m.diff*3})`})),
+  stratagems:()=>[{t:'ts',m:'ESTRATAGEMAS DISPONIBLES (selección):'},...STRATS.slice(0,8).map((s,i)=>({t:'tl2',m:`[${i+1}] ${s.name} (${s.cat}) — ${s.keys.join(' ')}`})),{t:'tl2',m:'... Usa la pestaña ESTRATAGEMAS para ver todas.'}],
+  bestiary:()=>[{t:'ts',m:'BESTIARIO (selección):'},...BEASTS.slice(0,6).map((b,i)=>({t:'tl2',m:`[${i+1}] ${b.name} (${b.fd}) — Amenaza: ${b.th==='tl'?'BAJA':b.th==='tm'?'MEDIA':'ALTA'}`})),{t:'tl2',m:'... Usa la pestaña BESTIARIO para detalles.'}],
+  intel:()=>[{t:'ts',m:'REPORTE DE INTELIGENCIA:'},{t:'tl2',m:'Planetas totales: 261'},{t:'tl2',m:'Control SE: 92 (35%)'},{t:'tl2',m:'Bajo amenaza: 169 (65%)'},{t:'tl2',m:'Reservas E-710: 43%'},{t:'tl2',m:'Democracia Gestionada: ESTABLE'}],
   lore:()=>LORE.map((l,i)=>({t:'tl2',m:`[${i+1}] ${l.title}`})),
   helldiver:()=>[{t:'ts',m:'PERFIL:'},{t:'tl2',m:'ID: HD-4892 "IRON LIBERTY"'},{t:'tl2',m:'Rango: CABO MAYOR ★★★'},{t:'tl2',m:'Bajas: 184,432'},{t:'tl2',m:'Misiones: 2,891'},{t:'tl2',m:'Estado: ACTIVO — POR LA DEMOCRACIA'}],
   democracy:()=>[{t:'ts',m:'DEMOCRACIA GESTIONADA:'},{t:'tl2',m:'"La Democracia no es un derecho."'},{t:'tl2',m:'"Es un privilegio que se gana."'},{t:'tl2',m:'"Con cada Terminido muerto."'},{t:'te',m:'Mensaje aprobado por el Ministerio de la Verdad.'}],
+  propaganda:()=>[{t:'ts',m:'COMUNICADOS DEL MINISTERIO:'},{t:'tl2',m:'"LA LIBERTAD NO ES GRATUITA — CUESTA VIDAS."'},{t:'tl2',m:'"AFORTUNADAMENTE LAS VIDAS SON ABUNDANTES."'},{t:'tl2',m:'"POR LA DEMOCRACIA GESTIONADA — ¡ÚNETE!"'}],
+  armory:()=>[{t:'ts',m:'ARMERÍA SEAF (selección):'},...WEAPONS.slice(0,5).map((w,i)=>({t:'tl2',m:`[${i+1}] ${w.name} (${w.td}) — Daño: ${w.stats.DMG}`})),{t:'tl2',m:'... Usa la pestaña ARMERÍA para ver todas.'}],
+  codex:()=>[{t:'ts',m:'CÓDICE DE PLANETAS:'},{t:'tl2',m:'261 planetas registrados.'},{t:'tl2',m:'92 liberados, 169 bajo amenaza.'},{t:'tl2',m:'Usa la pestaña CÓDICE para buscar.'}],
+  leaderboard:()=>[{t:'ts',m:'RANKING GALÁCTICO:'},{t:'tl2',m:'Top Helldivers por bajas.'},{t:'tl2',m:'Actualizado en vivo.'},{t:'tl2',m:'Usa la pestaña RANKING para ver la lista.'}],
+  classified:()=>[{t:'te',m:'ACCESO RESTRINGIDO — REQUIERE AUTORIZACIÓN OMEGA'},{t:'tl2',m:'Usa la pestaña RESTRINGIDO para autenticarte.'}],
+  time:()=>[{t:'ts',m:'HORA ACTUAL:'},{t:'tl2',m:document.getElementById('clock').textContent+' UTC'},{t:'tl2',m:'Año Galáctico: 2185'}],
+  version:()=>[{t:'ts',m:'VERSIÓN DEL SISTEMA:'},{t:'tl2',m:'SEAF TERMINAL OPERACIONAL v4.7.2'},{t:'tl2',m:'Base de Datos Galáctica: 261 planetas'},{t:'tl2',m:'Sistema de Misiones: ACTIVO'}],
+  motd:()=>[{t:'ts',m:'MENSAJE DEL DÍA:'},{t:'ts',m:'★ ALERTA: SECTOR VALDIS BAJO ATAQUE AUTÓMATA ★'},{t:'ts',m:'TERMINIDOS ROMPEN CONTENCIÓN EN ÉFIDAS ★'},{t:'ts',m:'OP. ESCUDO ETERNO EN CURSO ★'},{t:'ts',m:'POR LA DEMOCRACIA GESTIONADA — ¡ÚNETE!'}],
 };
 const tout=document.getElementById('tout');
 const ti=document.getElementById('ti');
