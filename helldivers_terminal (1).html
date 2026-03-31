@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>S.E.A.F. TERMINAL — SUPER EARTH ARMED FORCES</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+:root{
+  --gold:#D4A017;--gold-dim:#8B6914;--gold-bright:#FFD700;
+  --red:#CC2200;--red-bright:#FF3300;
+  --green:#00CC44;--green-dim:#005522;
+  --amber:#FF8C00;
+  --bg-dark:#050A05;--bg-panel:#080E08;--bg-card:#0D160D;
+  --border:#1A2A1A;
+  --text-main:#AADDAA;--text-dim:#4A7A4A;
+  --scanline:rgba(0,20,0,0.22);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg-dark);color:var(--text-main);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,var(--scanline) 2px,var(--scanline) 4px);pointer-events:none;z-index:9999;}
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:#000;}::-webkit-scrollbar-thumb{background:var(--gold-dim);}
+
+/* BOOT */
+#boot{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;transition:opacity .8s;}
+#boot-logo{font-family:'Orbitron',sans-serif;font-size:clamp(16px,4vw,36px);font-weight:900;color:var(--gold-bright);text-align:center;letter-spacing:6px;margin-bottom:36px;}
+#boot-lines{font-size:12px;color:#00AA33;width:min(520px,90vw);line-height:2;}
+.bl{opacity:0;transition:opacity .15s;}.bl.on{opacity:1;}
+#bbar-w{width:min(520px,90vw);border:1px solid #00AA33;padding:3px;margin-top:22px;}
+#bbar{height:10px;background:#00FF44;width:0%;transition:width .07s linear;box-shadow:0 0 8px #00FF44;}
+
+/* NOTIFICATIONS */
+#nc{position:fixed;top:68px;right:14px;z-index:800;display:flex;flex-direction:column;gap:7px;pointer-events:none;width:270px;}
+.notif{background:#050A05;border-left:3px solid var(--green);padding:9px 13px;font-size:10px;transform:translateX(310px);transition:transform .35s cubic-bezier(.2,0,.3,1);pointer-events:auto;}
+.notif.show{transform:translateX(0);}
+.notif.nw{border-left-color:var(--amber);}.notif.nd{border-left-color:var(--red-bright);}
+.notif-t{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;color:var(--green);margin-bottom:3px;}
+.notif.nw .notif-t{color:var(--amber);}.notif.nd .notif-t{color:var(--red-bright);}
+.notif-m{color:var(--text-dim);line-height:1.5;}
+
+/* HEADER */
+#hdr{background:#000;border-bottom:2px solid var(--gold);padding:9px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;gap:10px;flex-wrap:wrap;}
+#hdr-l{display:flex;align-items:center;gap:12px;}
+.emb{width:44px;height:44px;border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;background:radial-gradient(circle,#1A1000,#000);flex-shrink:0;animation:ep 3s ease-in-out infinite;}
+@keyframes ep{0%,100%{box-shadow:0 0 10px var(--gold-dim)}50%{box-shadow:0 0 22px var(--gold)}}
+#hdr-title .main{font-family:'Orbitron',sans-serif;font-size:clamp(9px,2vw,17px);font-weight:900;color:var(--gold-bright);letter-spacing:3px;}
+#hdr-title .sub{font-size:8px;color:var(--gold-dim);letter-spacing:2px;}
+#hdr-r{text-align:right;font-size:9px;color:var(--text-dim);line-height:1.7;flex-shrink:0;}
+#hdr-r .live{color:var(--green);animation:blink 1.5s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* HELLDIVER CARD */
+#hdc{background:#070C07;border-bottom:1px solid var(--border);padding:9px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.hd-av{width:42px;height:42px;border:2px solid var(--gold-dim);border-radius:50%;background:#0A140A;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.hd-info{flex:1;min-width:140px;}
+.hd-name{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--gold-bright);letter-spacing:2px;}
+.hd-rank{font-size:9px;color:var(--text-dim);margin-top:2px;}
+.hd-stats{display:flex;gap:18px;flex-wrap:wrap;}
+.hd-s{font-size:9px;text-align:center;}
+.hd-s .sv{font-family:'Orbitron',sans-serif;font-size:13px;display:block;}
+.hd-s .sl{color:var(--text-dim);}
+.hd-xp{flex:1;min-width:110px;}
+.hd-xp-l{font-size:8px;color:var(--text-dim);margin-bottom:3px;font-family:'Orbitron',sans-serif;letter-spacing:1px;}
+.xpb{background:#0A140A;border:1px solid var(--border);height:6px;overflow:hidden;}
+.xpf{height:100%;background:var(--gold);box-shadow:0 0 5px var(--gold-dim);width:0%;transition:width 1.5s ease;}
+
+/* TICKER */
+#ticker{background:#000;border-top:1px solid var(--gold-dim);border-bottom:1px solid var(--gold-dim);padding:4px 0;overflow:hidden;white-space:nowrap;}
+#ticker-in{display:inline-block;font-size:10px;color:var(--gold);animation:tick 55s linear infinite;padding-left:100%;}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+
+/* STATUS BAR */
+#sbar{background:#060A06;border-bottom:1px solid var(--border);padding:5px 18px;display:flex;gap:18px;font-size:9px;flex-wrap:wrap;}
+.si{display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.dot{width:5px;height:5px;border-radius:50%;}
+.dg{background:var(--green);box-shadow:0 0 4px var(--green);animation:blink 2s step-end infinite;}
+.dr{background:var(--red-bright);box-shadow:0 0 4px var(--red-bright);animation:blink 1s step-end infinite;}
+.da{background:var(--amber);box-shadow:0 0 4px var(--amber);animation:blink 2.5s step-end infinite;}
+.dp{background:#8844FF;box-shadow:0 0 4px #8844FF;animation:blink 3s step-end infinite;}
+
+/* WAR COUNTER */
+#wc{background:#040804;border-bottom:1px solid var(--border);padding:7px 18px;display:flex;}
+.wci{flex:1;text-align:center;padding:3px 6px;border-right:1px solid var(--border);}
+.wci:last-child{border-right:none;}
+.wcv{font-family:'Orbitron',sans-serif;font-size:clamp(11px,2vw,17px);font-weight:900;display:block;}
+.wcl{font-size:8px;color:var(--text-dim);letter-spacing:1px;font-family:'Orbitron',sans-serif;}
+.wck .wcv{color:#FF8833;}.wcd .wcv{color:var(--red-bright);}.wcm .wcv{color:var(--green);}.wcli .wcv{color:var(--gold);}.wcs .wcv{color:#AA66FF;}
+
+/* TABS */
+#tabs{background:var(--bg-panel);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;scrollbar-width:none;}
+#tabs::-webkit-scrollbar{display:none;}
+.tab{font-family:'Orbitron',sans-serif;font-size:8px;font-weight:700;letter-spacing:1.5px;padding:11px 14px;cursor:pointer;border-right:1px solid var(--border);color:var(--text-dim);white-space:nowrap;transition:all .2s;user-select:none;display:flex;align-items:center;gap:5px;}
+.tab:hover{color:var(--text-main);background:rgba(0,80,0,.2);}
+.tab.active{color:var(--gold-bright);background:var(--bg-dark);border-bottom:2px solid var(--gold);}
+.tab.tr{color:#660000;}.tab.tr:hover{color:var(--red-bright);}.tab.tr.active{color:var(--red-bright);border-bottom-color:var(--red-bright);}
+.tbadge{background:var(--red-bright);color:#fff;font-size:7px;padding:1px 4px;font-family:'Orbitron',sans-serif;}
+
+/* PANELS */
+.panel{display:none;padding:18px;animation:fi .3s ease;}
+.panel.active{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* SECTION TITLE */
+.st{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:3px;border-bottom:1px solid var(--gold-dim);padding-bottom:6px;margin-bottom:16px;}
+
+/* MAP */
+#mpw{width:100%;max-width:960px;margin:0 auto;background:#010601;border:1px solid var(--border);overflow:hidden;}
+#gc{width:100%;height:clamp(260px,46vw,500px);display:block;}
+.mleg{display:flex;gap:14px;margin-top:9px;font-size:9px;flex-wrap:wrap;}
+.li{display:flex;align-items:center;gap:4px;}
+.ld{width:8px;height:8px;border-radius:50%;}
+#ptip{position:fixed;background:#050A05;border:1px solid var(--gold-dim);padding:7px 11px;font-size:9px;pointer-events:none;z-index:300;display:none;min-width:130px;line-height:1.8;}
+#ptip .ptn{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--gold);margin-bottom:3px;}
+
+/* SECTOR GRID */
+.sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:9px;margin-top:14px;}
+.sc{background:var(--bg-card);border:1px solid var(--border);padding:11px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.sc::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;}
+.sc.st-t::before{background:#FF6600;}.sc.st-a::before{background:#CC0000;}
+.sc.st-l::before{background:var(--green);}.sc.st-c::before{background:var(--amber);}
+.sc:hover{border-color:var(--gold-dim);background:#101A10;transform:translateY(-1px);}
+.sc h3{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--gold);margin-bottom:5px;letter-spacing:1px;}
+.sc-info{font-size:9px;color:var(--text-dim);line-height:1.6;}
+.sc-tag{font-size:8px;margin-top:5px;padding:2px 6px;display:inline-block;font-family:'Orbitron',sans-serif;letter-spacing:1px;}
+.tag-t{background:rgba(255,102,0,.12);color:#FF8833;border:1px solid #FF6600;}
+.tag-a{background:rgba(200,0,0,.12);color:#FF4444;border:1px solid #CC0000;}
+.tag-l{background:rgba(0,180,60,.12);color:var(--green);border:1px solid var(--green-dim);}
+.tag-c{background:rgba(255,140,0,.12);color:var(--amber);border:1px solid #AA5500;}
+
+/* FACTION BAR */
+.fb{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:18px;}
+.fc{background:var(--bg-card);border:1px solid var(--border);padding:12px;text-align:center;}
+.fcn{font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px;margin-bottom:5px;}
+.fc-t .fcn{color:#FF8833;}.fc-a .fcn{color:#FF4444;}.fc-i .fcn{color:#AA66FF;}
+.fcv{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:900;margin-bottom:2px;}
+.fc-t .fcv{color:#FF8833;}.fc-a .fcv{color:#FF4444;}.fc-i .fcv{color:#AA66FF;}
+.fcs{font-size:8px;color:var(--text-dim);}
+.pb{background:#0A140A;border:1px solid var(--border);height:7px;margin-top:7px;overflow:hidden;}
+.pbf{height:100%;transition:width 1.5s ease;}
+.pbt{background:#FF6600;box-shadow:0 0 5px #FF6600;}.pba{background:var(--red-bright);box-shadow:0 0 5px var(--red-bright);}
+.pbi{background:#8844FF;box-shadow:0 0 5px #8844FF;}.pbg{background:var(--green);box-shadow:0 0 5px var(--green);}
+
+/* MISSIONS */
+.ml{display:flex;flex-direction:column;gap:9px;}
+.mc{background:var(--bg-card);border:1px solid var(--border);padding:13px;display:grid;grid-template-columns:1fr auto;gap:9px;align-items:start;cursor:pointer;transition:all .2s;}
+.mc:hover{border-color:var(--gold-dim);background:#101A10;}
+.mc h3{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--gold-bright);margin-bottom:4px;letter-spacing:1px;}
+.mc-meta{font-size:9px;color:var(--text-dim);line-height:1.8;}
+.mc-diff{font-family:'Orbitron',sans-serif;font-size:8px;padding:3px 8px;border:1px solid;white-space:nowrap;}
+.d1{color:#00FF44;border-color:#00FF44;background:rgba(0,255,68,.06);}
+.d2{color:var(--amber);border-color:var(--amber);background:rgba(255,140,0,.06);}
+.d3{color:#FF4444;border-color:#FF4444;background:rgba(255,68,68,.06);}
+.objs{margin-top:7px;}
+.ob{font-size:9px;color:var(--text-dim);padding:2px 0;}
+.ob::before{content:'▸ ';color:var(--gold-dim);}
+.mc-timer{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--amber);margin-top:5px;}
+.mc-reward{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;}
+.rwc{font-size:8px;padding:2px 6px;border:1px solid var(--border);color:var(--text-dim);font-family:'Orbitron',sans-serif;}
+
+/* STRATAGEMS */
+.sf{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;}
+.sfb{background:var(--bg-card);border:1px solid var(--border);color:var(--text-dim);font-family:'Orbitron',sans-serif;font-size:8px;padding:4px 9px;cursor:pointer;letter-spacing:1px;transition:all .2s;}
+.sfb:hover{border-color:var(--gold-dim);color:var(--text-main);}
+.sfb.active{border-color:var(--gold);color:var(--gold-bright);background:#141E14;}
+.stg{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:9px;}
+.stc{background:var(--bg-card);border:1px solid var(--border);padding:12px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.stc:hover{border-color:var(--gold-dim);background:#101A10;}
+.stc.sel{border-color:var(--gold);background:#141E14;}
+.si2{font-size:24px;margin-bottom:7px;display:block;}
+.sn{font-family:'Orbitron',sans-serif;font-size:8px;color:var(--gold);letter-spacing:1px;margin-bottom:3px;}
+.stype{font-size:8px;color:var(--text-dim);}
+.scd{font-size:8px;color:var(--amber);margin-top:3px;font-family:'Orbitron',sans-serif;}
+.skeys{display:flex;gap:2px;justify-content:center;margin-top:5px;}
+.sk{width:13px;height:13px;border:1px solid var(--gold-dim);font-size:7px;display:flex;align-items:center;justify-content:center;color:var(--gold-dim);font-family:'Orbitron',sans-serif;}
+.scat{font-family:'Orbitron',sans-serif;font-size:8px;color:var(--text-dim);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);letter-spacing:2px;}
+
+/* BESTIARY */
+.bg{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:11px;}
+.bc{background:var(--bg-card);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:all .2s;}
+.bc:hover{border-color:var(--gold-dim);transform:translateY(-2px);}
+.bc-hdr{padding:11px 13px 7px;display:flex;align-items:center;gap:9px;}
+.bc-icon{font-size:28px;flex-shrink:0;}
+.bc-info h3{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--gold);letter-spacing:1px;margin-bottom:3px;}
+.bcf{font-size:8px;padding:1px 5px;display:inline-block;font-family:'Orbitron',sans-serif;}
+.bf-t{background:rgba(255,102,0,.15);color:#FF8833;border:1px solid #FF6600;}
+.bf-a{background:rgba(200,0,0,.15);color:#FF4444;border:1px solid #880000;}
+.bf-i{background:rgba(136,68,255,.15);color:#AA66FF;border:1px solid #663399;}
+.bc-body{padding:0 13px 11px;font-size:9px;color:var(--text-dim);line-height:1.7;}
+.bst-g{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:7px;}
+.bst{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(26,42,26,.35);font-size:8px;}
+.bst:last-child{border-bottom:none;}
+.bstv{color:var(--text-main);}
+.tpip{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:2px;}
+.tl{background:#00CC44;}.tm{background:var(--amber);}.th{background:var(--red-bright);}
+
+/* LORE */
+.lg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:13px;}
+.lc{background:var(--bg-card);border:1px solid var(--border);padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.lc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold-dim),transparent);opacity:0;transition:opacity .2s;}
+.lc:hover{border-color:var(--gold-dim);}.lc:hover::after{opacity:1;}
+.lc-ico{font-size:24px;margin-bottom:9px;}
+.lc h3{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--gold);margin-bottom:5px;letter-spacing:1px;}
+.lc p{font-size:10px;color:var(--text-dim);line-height:1.6;}
+.lc-tag{font-size:8px;margin-top:7px;color:var(--text-dim);}
+.lc-new{position:absolute;top:7px;right:7px;background:var(--red-bright);color:#fff;font-size:7px;padding:1px 5px;font-family:'Orbitron',sans-serif;}
+
+/* LORE MODAL */
+#lm{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;align-items:center;justify-content:center;padding:14px;}
+#lm.open{display:flex;}
+#lmi{background:var(--bg-card);border:1px solid var(--gold-dim);max-width:680px;width:100%;max-height:85vh;overflow-y:auto;padding:26px;position:relative;}
+#lmi h2{font-family:'Orbitron',sans-serif;font-size:14px;color:var(--gold-bright);margin-bottom:16px;letter-spacing:2px;border-bottom:1px solid var(--gold-dim);padding-bottom:9px;}
+.lmb{font-size:11px;color:var(--text-main);line-height:1.9;}
+.lmb p{margin-bottom:11px;}
+.mclose{position:absolute;top:12px;right:12px;font-family:'Orbitron',sans-serif;font-size:9px;color:var(--gold-dim);cursor:pointer;border:1px solid var(--gold-dim);padding:3px 7px;background:transparent;transition:all .2s;}
+.mclose:hover{color:var(--gold-bright);border-color:var(--gold);}
+
+/* INTEL */
+.ig{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;}
+.ic{background:var(--bg-card);border:1px solid var(--border);padding:16px;}
+.ic h3{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--gold);letter-spacing:2px;margin-bottom:11px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.ir{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(26,42,26,.35);font-size:9px;}
+.ir:last-child{border-bottom:none;}
+.il{color:var(--text-dim);}
+.iv{color:var(--text-main);}
+.iv.ok{color:var(--green);}.iv.warn{color:var(--amber);}.iv.danger{color:var(--red-bright);}
+
+/* PROPAGANDA */
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:13px;}
+.pc{background:var(--bg-card);border:1px solid var(--border);padding:18px;text-align:center;position:relative;overflow:hidden;}
+.pc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.pd::before{background:var(--gold);}.pw::before{background:var(--red-bright);}.pe::before{background:var(--green);}
+.pq{font-size:12px;color:#CCFFCC;line-height:1.8;margin-bottom:14px;font-style:italic;}
+.pa{font-family:'Orbitron',sans-serif;font-size:8px;color:var(--gold-dim);letter-spacing:2px;}
+.pp{font-size:38px;margin-bottom:12px;display:block;}
+.pb2{background:var(--bg-dark);border:1px solid var(--gold-dim);color:var(--gold);font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;padding:6px 12px;cursor:pointer;margin-top:11px;transition:all .2s;display:inline-block;}
+.pb2:hover{background:#141E14;border-color:var(--gold);}
+
+/* TERMINAL */
+#tout{background:#000;border:1px solid var(--border);padding:14px;height:280px;overflow-y:auto;font-size:10px;line-height:1.7;margin-bottom:10px;}
+#tout .tl2{color:var(--green);}#tout .tc{color:var(--gold);}#tout .te{color:var(--red-bright);}#tout .ts{color:var(--text-dim);}
+#tiw{display:flex;gap:7px;align-items:center;}
+#tiw span{color:var(--green);font-size:11px;white-space:nowrap;}
+#ti{background:transparent;border:none;border-bottom:1px solid var(--green);color:var(--green);font-family:'Share Tech Mono',monospace;font-size:11px;flex:1;outline:none;padding:3px 0;}
+#ti::placeholder{color:var(--green-dim);}
+
+/* CLASSIFIED */
+#clw{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;text-align:center;}
+.cl-logo{font-size:52px;animation:rp 2s ease-in-out infinite;margin-bottom:18px;}
+@keyframes rp{0%,100%{filter:drop-shadow(0 0 8px #CC0000)}50%{filter:drop-shadow(0 0 20px #FF0000)}}
+#clw h2{font-family:'Orbitron',sans-serif;font-size:clamp(13px,3vw,21px);color:var(--red-bright);letter-spacing:4px;margin-bottom:9px;}
+#clw p{font-size:10px;color:#884444;margin-bottom:24px;max-width:360px;line-height:1.7;}
+.af{display:flex;flex-direction:column;gap:9px;width:min(290px,90vw);}
+.af input{background:#0A0000;border:1px solid #441111;color:var(--red-bright);font-family:'Share Tech Mono',monospace;font-size:11px;padding:8px 11px;outline:none;letter-spacing:2px;text-align:center;}
+.af input:focus{border-color:var(--red-bright);box-shadow:0 0 7px rgba(200,0,0,.3);}
+.af input::placeholder{color:#441111;}
+.abtn{background:#1A0000;border:1px solid #CC0000;color:var(--red-bright);font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:3px;padding:10px;cursor:pointer;transition:all .2s;}
+.abtn:hover{background:#2A0000;box-shadow:0 0 11px rgba(200,0,0,.4);}
+#aerr{color:#FF4444;font-size:9px;display:none;}
+#clc{display:none;}
+.clh{background:#0A0000;border:2px solid #CC0000;padding:12px 18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px;}
+.clh h2{font-family:'Orbitron',sans-serif;font-size:12px;color:var(--red-bright);letter-spacing:3px;}
+.clbadge{background:#CC0000;color:#fff;font-family:'Orbitron',sans-serif;font-size:8px;padding:3px 9px;letter-spacing:2px;}
+.cdoc{background:#080000;border:1px solid #441111;border-left:4px solid #CC0000;padding:20px;margin-bottom:16px;position:relative;}
+.cdoc::before{content:'⬛ CLASIFICADO ⬛';position:absolute;top:-8px;left:16px;background:#CC0000;color:#fff;font-size:7px;font-family:'Orbitron',sans-serif;padding:2px 7px;letter-spacing:2px;}
+.cdoc h3{font-family:'Orbitron',sans-serif;font-size:11px;color:#FF4444;margin-bottom:11px;letter-spacing:2px;}
+.cdoc .dm2{font-size:8px;color:#664444;margin-bottom:13px;line-height:1.8;}
+.cdoc p{font-size:10px;color:#AAAAAA;line-height:1.9;margin-bottom:9px;}
+.rx{background:#CC0000;color:#CC0000;user-select:none;padding:0 2px;}
+.wb{background:rgba(200,0,0,.09);border:1px solid #660000;padding:9px 13px;margin-top:13px;font-size:9px;color:#884444;line-height:1.7;}
+
+/* DENIED DOC */
+.ddoc{background:#060000;border:1px solid #550000;border-left:4px solid #880000;padding:16px 20px;margin-bottom:16px;position:relative;cursor:pointer;transition:all .2s;}
+.ddoc::before{content:'⛔ ACCESO DENEGADO ⛔';position:absolute;top:-8px;left:16px;background:#880000;color:#ffaaaa;font-size:7px;font-family:'Orbitron',sans-serif;padding:2px 7px;letter-spacing:2px;}
+.ddoc:hover{border-color:#AA0000;background:#0A0000;}
+.ddoc:hover .ddh{opacity:1;}
+.ddh-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.ddoc h3{font-family:'Orbitron',sans-serif;font-size:11px;color:#772222;letter-spacing:2px;text-decoration:line-through;text-decoration-color:#440000;}
+.ddbadge{background:#1A0000;border:1px solid #660000;color:#CC2222;font-family:'Orbitron',sans-serif;font-size:7px;padding:2px 8px;letter-spacing:2px;animation:db 2s step-end infinite;}
+@keyframes db{0%,100%{opacity:1}50%{opacity:.4}}
+.ddmeta{font-size:8px;color:#441111;margin-top:9px;line-height:1.8;}
+.bt{filter:blur(3px);color:#662222;user-select:none;}
+.ddh{font-size:8px;color:#660000;margin-top:7px;opacity:0;transition:opacity .2s;font-family:'Orbitron',sans-serif;}
+
+/* DENIED MODAL */
+#dm{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:600;align-items:center;justify-content:center;padding:14px;}
+#dm.open{display:flex;}
+#dmi{background:#050000;border:2px solid #CC0000;max-width:520px;width:100%;position:relative;overflow:hidden;}
+#dmi::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(200,0,0,.03) 3px,rgba(200,0,0,.03) 4px);pointer-events:none;}
+.dmt{background:#CC0000;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;}
+.dmt h2{font-family:'Orbitron',sans-serif;font-size:11px;color:#fff;letter-spacing:3px;}
+.dmcl{background:transparent;border:1px solid rgba(255,255,255,.4);color:#fff;font-family:'Orbitron',sans-serif;font-size:8px;padding:2px 7px;cursor:pointer;transition:all .2s;}
+.dmcl:hover{background:rgba(255,255,255,.15);}
+.dmb{padding:26px 22px;text-align:center;}
+.dmico{font-size:44px;display:block;margin:0 auto 14px;animation:dsh .5s ease-in-out;}
+@keyframes dsh{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.dmcase{font-family:'Orbitron',sans-serif;font-size:9px;color:#660000;letter-spacing:2px;margin-bottom:14px;}
+.dmtitle{font-family:'Orbitron',sans-serif;font-size:14px;color:#FF3333;letter-spacing:2px;margin-bottom:5px;}
+.dmsub{font-size:9px;color:#882222;margin-bottom:20px;line-height:1.8;}
+.dmterm{background:#000;border:1px solid #440000;padding:12px 16px;text-align:left;margin-bottom:16px;font-size:9px;color:#CC0000;line-height:2;}
+.dmterm .td2{color:#440000;}.dmterm .tw2{color:#FF4444;}.dmterm .tb2{animation:blink 1s step-end infinite;}
+.clbar{display:flex;gap:4px;justify-content:center;margin-bottom:18px;}
+.clv{width:28px;height:12px;border:1px solid #440000;font-size:6px;font-family:'Orbitron',sans-serif;display:flex;align-items:center;justify-content:center;color:#440000;}
+.clv.f{background:#660000;color:#FF8888;border-color:#880000;}
+.clv.r{background:#CC0000;color:#fff;border-color:#FF0000;animation:db 1s step-end infinite;}
+.dmstamp{border:3px solid #CC0000;color:#CC0000;font-family:'Orbitron',sans-serif;font-size:19px;font-weight:900;letter-spacing:4px;padding:6px 16px;display:inline-block;transform:rotate(-8deg);opacity:.8;margin-bottom:16px;}
+.dmwarn{background:#0A0000;border:1px solid #330000;padding:9px 11px;font-size:8px;color:#551111;line-height:1.8;text-align:left;margin-bottom:16px;}
+.dmbtn{background:#1A0000;border:1px solid #660000;color:#CC2222;font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;padding:8px 16px;cursor:pointer;width:100%;transition:all .2s;}
+.dmbtn:hover{background:#2A0000;}
+
+/* FOOTER */
+.footer{border-top:1px solid var(--border);padding:12px 18px;font-size:8px;color:var(--text-dim);text-align:center;line-height:1.8;margin-top:38px;}
+@media(max-width:600px){.fb{grid-template-columns:1fr;}.wci{padding:3px 3px;}}
+
+/* GLITCH */
+@keyframes glitch1{0%,92%,100%{clip-path:none;transform:none}93%{clip-path:polygon(0 15%,100% 15%,100% 35%,0 35%);transform:translateX(-3px)}95%{clip-path:polygon(0 55%,100% 55%,100% 75%,0 75%);transform:translateX(3px)}97%{clip-path:none;transform:none}}
+.glitch-txt{animation:glitch1 9s infinite;}
+
+/* ALERT FEED */
+#alert-feed{background:#040804;border-bottom:1px solid var(--border);padding:0 18px;max-height:0;overflow:hidden;transition:max-height .4s ease;}
+#alert-feed.open{max-height:130px;padding:6px 18px;}
+.af-row{font-size:9px;display:flex;gap:8px;align-items:baseline;border-bottom:1px solid rgba(26,42,26,.3);padding:3px 0;}
+.af-row:last-child{border-bottom:none;}
+.af-time{color:var(--text-dim);flex-shrink:0;font-family:'Orbitron',sans-serif;font-size:7px;}
+.af-tag{font-family:'Orbitron',sans-serif;font-size:7px;padding:1px 5px;flex-shrink:0;}
+.af-ok{color:var(--green);border:1px solid var(--green-dim);}
+.af-warn{color:var(--amber);border:1px solid #553300;}
+.af-crit{color:var(--red-bright);border:1px solid #550000;}
+.af-msg{color:var(--text-dim);}
+#alert-toggle{background:var(--bg-dark);border:none;border-bottom:1px solid var(--border);padding:3px 18px;font-size:8px;color:var(--text-dim);cursor:pointer;width:100%;text-align:left;font-family:'Share Tech Mono',monospace;transition:color .2s;display:flex;align-items:center;gap:6px;}
+#alert-toggle:hover{color:var(--text-main);}
+.at-dot{width:5px;height:5px;border-radius:50%;background:var(--red-bright);box-shadow:0 0 4px var(--red-bright);animation:blink 1s step-end infinite;}
+
+/* ARMORY */
+.arm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;}
+.arm-card{background:var(--bg-card);border:1px solid var(--border);overflow:hidden;transition:all .2s;cursor:pointer;}
+.arm-card:hover{border-color:var(--gold-dim);transform:translateY(-1px);}
+.arm-card.sel{border-color:var(--gold);box-shadow:0 0 12px rgba(212,160,23,.12);}
+.arm-top{padding:13px 15px 8px;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.arm-ico{font-size:27px;flex-shrink:0;}
+.arm-info{flex:1;}
+.arm-name{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--gold);letter-spacing:1px;margin-bottom:3px;}
+.arm-type{font-size:7px;font-family:'Orbitron',sans-serif;padding:1px 5px;display:inline-block;}
+.at-p{color:var(--gold);border:1px solid var(--gold-dim);}.at-s{color:var(--amber);border:1px solid #553300;}
+.at-sup{color:#66CCFF;border:1px solid #224466;}.at-g{color:#88FF44;border:1px solid #336611;}
+.arm-desc{font-size:9px;color:var(--text-dim);padding:0 15px 8px;line-height:1.6;}
+.arm-stats{padding:0 15px 12px;}
+.asr{display:grid;grid-template-columns:68px 1fr 26px;align-items:center;gap:5px;margin-bottom:4px;}
+.asl{font-size:7px;color:var(--text-dim);}
+.ab{background:#0A140A;height:4px;border:1px solid var(--border);overflow:hidden;}
+.abf{height:100%;transition:width 1s ease;}
+.abf-d{background:#FF6600;box-shadow:0 0 3px #FF6600;}
+.abf-c{background:var(--green);box-shadow:0 0 3px var(--green);}
+.abf-r{background:#66CCFF;box-shadow:0 0 3px #66CCFF;}
+.abf-rl{background:var(--gold);box-shadow:0 0 3px var(--gold);}
+.abf-p{background:#FF4444;box-shadow:0 0 3px #FF4444;}
+.av{font-size:7px;color:var(--text-main);font-family:'Orbitron',sans-serif;text-align:right;}
+.arm-tags{display:flex;gap:3px;padding:0 15px 12px;flex-wrap:wrap;}
+.arm-tag{font-size:7px;padding:1px 5px;color:var(--text-dim);border:1px solid var(--border);font-family:'Orbitron',sans-serif;}
+.arm-selected-panel{background:#0A1A0A;border:1px solid var(--gold-dim);padding:14px;margin-bottom:16px;display:none;}
+.arm-selected-panel.show{display:block;}
+.asp-title{font-family:'Orbitron',sans-serif;font-size:11px;color:var(--gold-bright);margin-bottom:8px;letter-spacing:2px;}
+.asp-body{font-size:10px;color:var(--text-main);line-height:1.8;}
+
+/* CODEX */
+.codex-controls{display:flex;gap:7px;margin-bottom:13px;flex-wrap:wrap;align-items:center;}
+.codex-search{background:#0A140A;border:1px solid var(--border);color:var(--text-main);font-family:'Share Tech Mono',monospace;font-size:10px;padding:5px 9px;outline:none;flex:1;min-width:120px;}
+.codex-search:focus{border-color:var(--gold-dim);}
+.codex-search::placeholder{color:var(--text-dim);}
+.codex-fb{background:var(--bg-card);border:1px solid var(--border);color:var(--text-dim);font-family:'Orbitron',sans-serif;font-size:7px;padding:4px 8px;cursor:pointer;letter-spacing:1px;transition:all .2s;white-space:nowrap;}
+.codex-fb:hover{border-color:var(--gold-dim);color:var(--text-main);}
+.codex-fb.active{border-color:var(--gold);color:var(--gold-bright);background:#141E14;}
+.codex-table{width:100%;border-collapse:collapse;font-size:10px;}
+.codex-table thead{background:#070C07;}
+.codex-table th{font-family:'Orbitron',sans-serif;font-size:7px;color:var(--gold-dim);letter-spacing:1px;padding:7px 9px;border-bottom:1px solid var(--border);text-align:left;cursor:pointer;user-select:none;white-space:nowrap;}
+.codex-table th:hover{color:var(--gold);}
+.codex-table td{padding:6px 9px;border-bottom:1px solid rgba(26,42,26,.35);color:var(--text-dim);vertical-align:middle;font-size:9px;}
+.codex-table tr:hover td{background:rgba(0,50,0,.18);color:var(--text-main);}
+.cn{color:var(--text-main);}
+.cs-t{color:#FF8833;font-family:'Orbitron',sans-serif;font-size:7px;}
+.cs-a{color:#FF4444;font-family:'Orbitron',sans-serif;font-size:7px;}
+.cs-l{color:var(--green);font-family:'Orbitron',sans-serif;font-size:7px;}
+.cs-c{color:var(--amber);font-family:'Orbitron',sans-serif;font-size:7px;}
+.cs-i{color:#AA66FF;font-family:'Orbitron',sans-serif;font-size:7px;}
+.tpips{display:flex;gap:2px;}
+.tpip3{width:9px;height:9px;border:1px solid var(--border);}
+.tpip3.on-t{background:#FF6600;}.tpip3.on-a{background:#CC0000;}.tpip3.on-l{background:var(--green);}.tpip3.on-i{background:#8844FF;}.tpip3.on-c{background:var(--amber);}
+.codex-count{font-size:9px;color:var(--text-dim);margin-left:auto;}
+
+/* LEADERBOARD */
+.lb-wrap{background:var(--bg-card);border:1px solid var(--border);overflow:hidden;}
+.lb-hdr{display:grid;grid-template-columns:38px 1fr 88px 88px 72px 64px;gap:6px;padding:8px 12px;font-family:'Orbitron',sans-serif;font-size:7px;color:var(--gold-dim);letter-spacing:1px;border-bottom:1px solid var(--gold-dim);background:#070C07;}
+.lb-row{display:grid;grid-template-columns:38px 1fr 88px 88px 72px 64px;gap:6px;padding:9px 12px;border-bottom:1px solid rgba(26,42,26,.3);font-size:9px;transition:background .15s;align-items:center;}
+.lb-row:hover{background:rgba(0,50,0,.18);}
+.lb-row.r1{background:rgba(212,160,23,.07);border-left:3px solid #FFD700;}
+.lb-row.r2{background:rgba(200,200,200,.04);border-left:3px solid #AAAAAA;}
+.lb-row.r3{background:rgba(150,75,0,.05);border-left:3px solid #CC8800;}
+.lb-rk{font-family:'Orbitron',sans-serif;font-size:10px;color:var(--text-dim);text-align:center;}
+.r1 .lb-rk{color:#FFD700;}.r2 .lb-rk{color:#CCCCCC;}.r3 .lb-rk{color:#CC8800;}
+.lb-cs{font-family:'Orbitron',sans-serif;font-size:9px;color:var(--text-main);}
+.lb-id{font-size:7px;color:var(--text-dim);}
+.lb-k{color:#FF8833;font-family:'Orbitron',sans-serif;}
+.lb-m{color:var(--green);font-family:'Orbitron',sans-serif;}
+.lb-d{color:var(--red-bright);}
+.lb-kdr{color:var(--gold);font-family:'Orbitron',sans-serif;}
+.lb-medals{font-size:14px;}
+.lb-top-bar{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.lb-live{background:rgba(0,200,68,.1);border:1px solid var(--green-dim);color:var(--green);font-family:'Orbitron',sans-serif;font-size:7px;padding:3px 9px;letter-spacing:2px;animation:blink 2s step-end infinite;}
+.lb-upd{font-size:8px;color:var(--text-dim);}
+.lb-sort{display:flex;gap:5px;flex-wrap:wrap;}
+.lb-sb{background:transparent;border:1px solid var(--border);color:var(--text-dim);font-family:'Orbitron',sans-serif;font-size:7px;padding:3px 7px;cursor:pointer;transition:all .2s;}
+.lb-sb.active{border-color:var(--gold);color:var(--gold);}
+.lb-sb:hover{border-color:var(--gold-dim);}
+.lb-change{font-size:7px;margin-left:3px;}
+.lb-up{color:var(--green);}.lb-dn{color:var(--red-bright);}.lb-eq{color:var(--text-dim);}
+.lb-planet{font-size:8px;color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+<div id="nc"></div>
+<div id="ptip"><div class="ptn" id="ptn"></div><div id="ptb"></div></div>
+
+<!-- BOOT -->
+<div id="boot">
+  <div id="boot-logo">☆ S.E.A.F. ☆<br>TERMINAL OPERACIONAL</div>
+  <div id="boot-lines">
+    <div class="bl" id="bl0">INICIANDO SISTEMA SEAF v4.7.2...</div>
+    <div class="bl" id="bl1">VERIFICANDO INTEGRIDAD DEL NÚCLEO.................. OK</div>
+    <div class="bl" id="bl2">CARGANDO BASE DE DATOS GALÁCTICA [261 PLANETAS]... OK</div>
+    <div class="bl" id="bl3">SISTEMA DE MISIONES ACTIVO......................... OK</div>
+    <div class="bl" id="bl4">ARSENAL DE ESTRATAGEMAS [18 ITEMS]................. OK</div>
+    <div class="bl" id="bl5">BESTIARIO [10 ENTIDADES CATALOGADAS]............... OK</div>
+    <div class="bl" id="bl6">ENCRIPTANDO ARCHIVOS NIVEL NEGRO................... OK</div>
+    <div class="bl" id="bl7">CONECTANDO CON MINISTERIO DE LA VERDAD............. OK</div>
+    <div class="bl" id="bl8" style="color:#FFD700;">BIENVENIDO, HELLDIVER. POR LA DEMOCRACIA GESTIONADA.</div>
+  </div>
+  <div id="bbar-w"><div id="bbar"></div></div>
+</div>
+
+<!-- HEADER -->
+<div id="hdr">
+  <div id="hdr-l">
+    <div class="emb">★</div>
+    <div id="hdr-title">
+      <div class="main">FUERZAS ARMADAS DE SÚPER TIERRA</div>
+      <div class="sub">TERMINAL DE OPERACIONES GALÁCTICAS — HELLDIVERS DIVISIÓN</div>
+    </div>
+  </div>
+  <div id="hdr-r">
+    <div class="live">● SISTEMA EN VIVO</div>
+    <div id="clock">--:--:--</div>
+    <div>AÑO GALÁCTICO 2185</div>
+  </div>
+</div>
+
+<!-- HELLDIVER CARD -->
+<div id="hdc">
+  <div class="hd-av">🪖</div>
+  <div class="hd-info">
+    <div class="hd-name">HD-4892 "IRON LIBERTY"</div>
+    <div class="hd-rank">CABO MAYOR ★★★ | SES FIST OF DEMOCRACY</div>
+  </div>
+  <div class="hd-stats">
+    <div class="hd-s"><span class="sv" style="color:var(--green)" id="sk">0</span><span class="sl">BAJAS</span></div>
+    <div class="hd-s"><span class="sv" style="color:var(--red-bright)" id="sd">0</span><span class="sl">MUERTES</span></div>
+    <div class="hd-s"><span class="sv" style="color:var(--gold)" id="sm">0</span><span class="sl">MISIONES</span></div>
+    <div class="hd-s"><span class="sv" style="color:#AA66FF" id="ss">0</span><span class="sl">MUESTRAS</span></div>
+  </div>
+  <div class="hd-xp">
+    <div class="hd-xp-l">XP — NIVEL 27 → 28</div>
+    <div class="xpb"><div class="xpf" id="xpf"></div></div>
+    <div style="font-size:8px;color:var(--text-dim);margin-top:2px;">72,400 / 100,000 XP</div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div id="ticker">
+  <span id="ticker-in">★ ALERTA: SECTOR VALDIS BAJO ATAQUE AUTÓMATA ★ TERMINIDOS ROMPEN CONTENCIÓN EN ÉFIDAS ★ OP. ESCUDO ETERNO EN CURSO ★ DISTRITO 48: ARCHIVOS BAJO SELLO ABSOLUTO DEL CONSEJO ★ 1.4M CIUDADANOS LIBERADOS ★ MALEVELON CREEK: JAMÁS OLVIDADO ★ ILLUMINADOS CONFIRMADOS EN SECTORES EXTERNOS ★ ¿QUIERES SABER MÁS? ÚNETE A LOS HELLDIVERS ★ BRIGADA JET NEUTRALIZADA EN LACAILLE ★ E-710 A 43% — SE REQUIEREN HELLDIVERS ★ LA DEMOCRACIA NO DUERME ★</span>
+</div>
+
+<!-- STATUS BAR -->
+<div id="sbar">
+  <div class="si"><div class="dot dr"></div><span>GUERRA GALÁCTICA: ACTIVA</span></div>
+  <div class="si"><div class="dot da"></div><span>TERMINIDOS: ALTA</span></div>
+  <div class="si"><div class="dot dr"></div><span>AUTÓMATAS: CRÍTICA</span></div>
+  <div class="si"><div class="dot dp"></div><span>ILLUMINADOS: DETECTADOS</span></div>
+  <div class="si"><div class="dot dg"></div><span>HELLDIVERS: <span id="hdc2">842,331</span></span></div>
+  <div class="si"><div class="dot dg"></div><span>DEMOCRACIA: GESTIONADA</span></div>
+</div>
+
+<!-- ALERT FEED -->
+<button id="alert-toggle" onclick="toggleAlertFeed()">
+  <div class="at-dot"></div>
+  <span id="at-label">▾ FEED DE ALERTAS EN VIVO — 7 INCIDENTES RECIENTES</span>
+</button>
+<div id="alert-feed">
+  <div id="af-inner"></div>
+</div>
+
+<!-- LIVE WAR COUNTER -->
+<div id="wc">
+  <div class="wci wck"><span class="wcv" id="wck">0</span><span class="wcl">BAJAS ENEMIGAS</span></div>
+  <div class="wci wcd"><span class="wcv" id="wcd">0</span><span class="wcl">HELLDIVERS CAÍDOS</span></div>
+  <div class="wci wcm"><span class="wcv" id="wcm">0</span><span class="wcl">MISIONES HOY</span></div>
+  <div class="wci wcli"><span class="wcv" id="wcli">92</span><span class="wcl">PLANETAS LIBRES</span></div>
+  <div class="wci wcs"><span class="wcv" id="wcs">0</span><span class="wcl">MUESTRAS</span></div>
+</div>
+
+<!-- TABS -->
+<div id="tabs">
+  <div class="tab active" onclick="sw('map',this)">🌌 MAPA GALÁCTICO</div>
+  <div class="tab" onclick="sw('missions',this)">⚔ MISIONES <span class="tbadge">5</span></div>
+  <div class="tab" onclick="sw('stratagems',this)">🚀 ESTRATAGEMAS</div>
+  <div class="tab" onclick="sw('bestiary',this)">☠ BESTIARIO</div>
+  <div class="tab" onclick="sw('intel',this)">📊 INTELIGENCIA</div>
+  <div class="tab" onclick="sw('lore',this)">📁 LORE</div>
+  <div class="tab" onclick="sw('propaganda',this)">📢 MINISTERIO</div>
+  <div class="tab" onclick="sw('armory',this)">🔫 ARMERÍA</div>
+  <div class="tab" onclick="sw('codex',this)">🪐 CÓDICE</div>
+  <div class="tab" onclick="sw('leaderboard',this)">🏆 RANKING</div>
+  <div class="tab" onclick="sw('terminal',this)">⌨ TERMINAL</div>
+  <div class="tab tr" onclick="sw('classified',this)">🔴 RESTRINGIDO</div>
+</div>
+
+<!-- MAP -->
+<div class="panel active" id="panel-map">
+  <div class="st">★ MAPA GALÁCTICO — GUERRA GALÁCTICA II ★</div>
+  <div class="fb">
+    <div class="fc fc-t"><div class="fcn">TERMINIDOS</div><div class="fcv">78</div><div class="fcs">PLANETAS — AMENAZA ALTA</div><div class="pb"><div class="pbf pbt" style="width:68%"></div></div></div>
+    <div class="fc fc-a"><div class="fcn">AUTÓMATAS</div><div class="fcv">91</div><div class="fcs">PLANETAS — AMENAZA CRÍTICA</div><div class="pb"><div class="pbf pba" style="width:82%"></div></div></div>
+    <div class="fc fc-i"><div class="fcn">ILLUMINADOS</div><div class="fcv">~12</div><div class="fcs">DETECTADOS — MEDIA</div><div class="pb"><div class="pbf pbi" style="width:44%"></div></div></div>
+  </div>
+  <div id="mpw"><canvas id="gc"></canvas></div>
+  <div class="mleg">
+    <div class="li"><div class="ld" style="background:#00CC44;box-shadow:0 0 4px #00CC44"></div>Liberado</div>
+    <div class="li"><div class="ld" style="background:#FF6600;box-shadow:0 0 4px #FF6600"></div>Terminidos</div>
+    <div class="li"><div class="ld" style="background:#CC0000;box-shadow:0 0 4px #CC0000"></div>Autómatas</div>
+    <div class="li"><div class="ld" style="background:#8844FF;box-shadow:0 0 4px #8844FF"></div>Illuminados</div>
+    <div class="li"><div class="ld" style="background:#FFD700;box-shadow:0 0 8px #FFD700"></div>Súper Tierra</div>
+    <div class="li"><div class="ld" style="background:#FF8C00;box-shadow:0 0 4px #FF8C00"></div>Disputado</div>
+    <div class="li" style="font-size:9px;color:var(--text-dim);">Hover sobre planeta para info</div>
+  </div>
+  <div class="st" style="margin-top:22px">SECTORES ACTIVOS</div>
+  <div class="sg">
+    <div class="sc st-t"><h3>SECTOR ÉFIDAS</h3><div class="sc-info">Planetas: 12 | E-710 alta densidad<br>Activos: 28,441 | Ops: 3 activas</div><span class="sc-tag tag-t">INFESTADO</span></div>
+    <div class="sc st-a"><h3>SECTOR VALDIS</h3><div class="sc-info">Planetas: 9 | Titanio estratégico<br>Activos: 41,220 | Brigada Jet</div><span class="sc-tag tag-a">ASEDIO AUTÓMATA</span></div>
+    <div class="sc st-l"><h3>SECTOR SOL CENTRAL</h3><div class="sc-info">Planetas: 15 | Zona civil<br>Activos: 5,900 | Pacificación</div><span class="sc-tag tag-l">LIBERADO</span></div>
+    <div class="sc st-c"><h3>SECTOR LACAILLE</h3><div class="sc-info">Planetas: 7 | Ruta a Cyberstan<br>Activos: 33,100 | Cyborgs activos</div><span class="sc-tag tag-c">EN DISPUTA</span></div>
+    <div class="sc st-a"><h3>SECTOR AURORA BAY</h3><div class="sc-info">Planetas: 11 | Depósitos minerales<br>Activos: 19,870 | Megafábrica</div><span class="sc-tag tag-a">ASEDIO</span></div>
+    <div class="sc st-c"><h3>SECTOR MIRIN</h3><div class="sc-info">Planetas: 8 | SEAF instalaciones<br>Activos: 12,330 | Terminidos</div><span class="sc-tag tag-c">EN DISPUTA</span></div>
+  </div>
+</div>
+
+<!-- MISSIONS -->
+<div class="panel" id="panel-missions">
+  <div class="st">★ MISIONES ACTIVAS — GUERRA GALÁCTICA II ★</div>
+  <div class="ml" id="mission-list"></div>
+</div>
+
+<!-- STRATAGEMS -->
+<div class="panel" id="panel-stratagems">
+  <div class="st">★ ARSENAL DE ESTRATAGEMAS ★</div>
+  <div class="sf" id="sf"></div>
+  <div class="stg" id="stg"></div>
+</div>
+
+<!-- BESTIARY -->
+<div class="panel" id="panel-bestiary">
+  <div class="st">★ BESTIARIO CLASIFICADO — AMENAZAS CONOCIDAS ★</div>
+  <div class="bg" id="bgrid"></div>
+</div>
+
+<!-- INTEL -->
+<div class="panel" id="panel-intel">
+  <div class="st">★ INFORME DE INTELIGENCIA ★</div>
+  <div class="ig" id="igrid"></div>
+</div>
+
+<!-- LORE -->
+<div class="panel" id="panel-lore">
+  <div class="st">★ ARCHIVOS DE LORE — BASE DE DATOS HISTÓRICA ★</div>
+  <div class="lg" id="lgrid"></div>
+</div>
+
+<!-- PROPAGANDA -->
+<div class="panel" id="panel-propaganda">
+  <div class="st">★ MINISTERIO DE LA VERDAD — COMUNICADOS OFICIALES ★</div>
+  <div class="pg" id="pgrid"></div>
+</div>
+
+<!-- TERMINAL -->
+<div class="panel" id="panel-terminal">
+  <div class="st">★ TERMINAL SEAF — ACCESO AL SISTEMA ★</div>
+  <div id="tout"></div>
+  <div id="tiw"><span>SEAF@terminal:~$</span><input type="text" id="ti" placeholder="escribir comando..." autocomplete="off" spellcheck="false"></div>
+  <div style="margin-top:9px;font-size:9px;color:var(--text-dim);">Comandos: help | status | planets | factions | mission list | lore | helldiver | democracy | clear</div>
+</div>
+
+<!-- ARMORY -->
+<div class="panel" id="panel-armory">
+  <div class="st">★ ARMERÍA SEAF — ARSENAL HELLDIVER ★</div>
+  <div class="arm-selected-panel" id="arm-selected">
+    <div class="asp-title" id="asp-title">ARMA SELECCIONADA</div>
+    <div class="asp-body" id="asp-body"></div>
+  </div>
+  <div class="arm-grid" id="arm-grid"></div>
+</div>
+
+<!-- CODEX -->
+<div class="panel" id="panel-codex">
+  <div class="st">★ CÓDICE DE PLANETAS — REGISTRO GALÁCTICO ★</div>
+  <div class="codex-controls">
+    <input class="codex-search" id="codex-search" placeholder="BUSCAR PLANETA..." oninput="renderCodex()">
+    <button class="codex-fb active" onclick="setCodexFilter('all',this)">TODOS</button>
+    <button class="codex-fb" onclick="setCodexFilter('terminid',this)">TERMINIDOS</button>
+    <button class="codex-fb" onclick="setCodexFilter('automaton',this)">AUTÓMATAS</button>
+    <button class="codex-fb" onclick="setCodexFilter('liberated',this)">LIBERADOS</button>
+    <button class="codex-fb" onclick="setCodexFilter('contested',this)">DISPUTADOS</button>
+    <button class="codex-fb" onclick="setCodexFilter('illuminate',this)">ILLUMINADOS</button>
+    <span class="codex-count" id="codex-count"></span>
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="codex-table">
+      <thead>
+        <tr>
+          <th onclick="sortCodex('name')">PLANETA ⇅</th>
+          <th onclick="sortCodex('sector')">SECTOR ⇅</th>
+          <th onclick="sortCodex('status')">CONTROL ⇅</th>
+          <th onclick="sortCodex('threat')">AMENAZA ⇅</th>
+          <th>NIVEL</th>
+          <th onclick="sortCodex('biome')">BIOMA ⇅</th>
+          <th onclick="sortCodex('e710')">E-710 ⇅</th>
+        </tr>
+      </thead>
+      <tbody id="codex-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div class="panel" id="panel-leaderboard">
+  <div class="st">★ RANKING GALÁCTICO — HELLDIVERS ACTIVOS ★</div>
+  <div class="lb-top-bar">
+    <div class="lb-live">● EN VIVO</div>
+    <div class="lb-upd">Actualizado: <span id="lb-upd-time">--:--:--</span></div>
+    <div class="lb-sort">
+      <span style="font-size:8px;color:var(--text-dim);font-family:'Orbitron',sans-serif;letter-spacing:1px;">ORDENAR:</span>
+      <button class="lb-sb active" onclick="sortLB('kills',this)">BAJAS</button>
+      <button class="lb-sb" onclick="sortLB('missions',this)">MISIONES</button>
+      <button class="lb-sb" onclick="sortLB('kdr',this)">K/D</button>
+    </div>
+  </div>
+  <div class="lb-wrap">
+    <div class="lb-hdr">
+      <div>#</div><div>HELLDIVER</div><div>BAJAS</div><div>MISIONES</div><div>MUERTES</div><div>K/D</div>
+    </div>
+    <div id="lb-body"></div>
+  </div>
+</div>
+
+<!-- CLASSIFIED -->
+<div class="panel" id="panel-classified">
+  <div id="clw">
+    <div class="cl-logo">⛔</div>
+    <h2>ACCESO RESTRINGIDO</h2>
+    <p>Sección de nivel NEGRO. Exclusivo para personal con autorización OMEGA. Acceso no autorizado constituye traición bajo §48-C.</p>
+    <div class="af">
+      <input type="text" id="au" placeholder="ID DE HELLDIVER" maxlength="20">
+      <input type="password" id="ap" placeholder="CÓDIGO OMEGA">
+      <button class="abtn" onclick="tryAuth()">AUTENTICAR — ACCEDER</button>
+      <div id="aerr">⚠ CREDENCIALES INVÁLIDAS — INTENTO REGISTRADO</div>
+    </div>
+  </div>
+  <div id="clc">
+    <div class="clh">
+      <h2>⛔ ARCHIVOS CLASIFICADOS — NIVEL NEGRO ⛔</h2>
+      <div class="clbadge">AUTORIZACIÓN: OMEGA</div>
+    </div>
+    <!-- DISTRICT 48 DENIED -->
+    <div class="ddoc" onclick="openDenied()">
+      <div class="ddh-row">
+        <h3>EXPEDIENTE: INCIDENTE DEL DISTRITO 48</h3>
+        <div class="ddbadge">⛔ NIVEL ALFA-ROJO</div>
+      </div>
+      <div class="ddmeta">
+        CLASIFICACIÓN: <span style="color:#880000;font-family:'Orbitron',sans-serif;font-size:8px">ULTRA NEGRO — SELLO ABSOLUTO</span><br>
+        CASO N°: <span class="bt">██████-48-SE / MIN-VERDAD-0084</span><br>
+        MINISTERIO: <span class="bt">VERDAD / INTELIGENCIA / UNIDAD / CONSEJO</span><br>
+        FECHA: <span class="bt">████ — PREVIO A 2084 — SUPRIMIDO POR DECRETO</span><br>
+        NIVEL REQUERIDO: <span style="color:#CC0000;font-family:'Orbitron',sans-serif;font-size:8px">AUTORIZACIÓN ALFA-ROJO — SOLO CONSEJO DEMOCRÁTICO</span>
+      </div>
+      <div class="ddh">▸ CLICK — ADVERTENCIA: INTENTO SERÁ REGISTRADO Y TRANSMITIDO</div>
+    </div>
+    <!-- TERMINAL DIRECTIVE -->
+    <div class="cdoc">
+      <h3>EXPEDIENTE: DIRECTIVA TERMINAL — PROTOCOLO OMEGA-9</h3>
+      <div class="dm2">CLASIFICACIÓN: NIVEL NEGRO | MINISTERIO: DEFENSA / ALTO MANDO | ESTADO: EN RESERVA</div>
+      <p>La Directiva Terminal es autorización de último recurso que permite al Alto Mando causar destrucción máxima sin importar consecuencias colaterales. Fue activada parcialmente durante la <strong style="color:#FF8833">Operación Pretext Válido</strong> en Cyberstan cuando la destrucción de la Megafábrica TRANSCENDENCIA fue declarada imposible por medios convencionales.</p>
+      <p>Archivos relacionados con <span class="rx">████████████████████████████████████████████████████████</span> sellados bajo autoridad del Consejo hasta el año <span class="rx">████</span>.</p>
+      <div class="wb">ℹ Este archivo no existe según el Ministerio de la Verdad. Si lo está leyendo, contacte a su Oficial de Lealtad. Que la Democracia le proteja.</div>
+    </div>
+    <!-- ILLUMINATED PEACE -->
+    <div class="cdoc">
+      <h3>EXPEDIENTE: PRIMER CONTACTO ILLUMINADO — OFERTA DE PAZ</h3>
+      <div class="dm2">CLASIFICACIÓN: NIVEL NEGRO | PERÍODO: Primera Guerra Galáctica | ESTADO: SUPRIMIDO</div>
+      <p>Los Illuminados son la única facción que se documenta haber <strong style="color:#AA66FF">intentado establecer un acuerdo de paz</strong> antes de que Súper Tierra iniciara hostilidades. Cuando establecieron contacto formal, <span class="rx">████████████████████████████████████████████████████████████████████████████████████████</span>. El resultado fue la declaración unilateral de guerra por parte de la Federación.</p>
+      <div class="wb">ℹ Reconocer que los Illuminados buscaron la paz primero constituye traición. Narrativa oficial: "Los Illuminados son una amenaza existencial que atacó sin provocación."</div>
+    </div>
+    <!-- CYBORG PROTOCOL -->
+    <div class="cdoc">
+      <h3>EXPEDIENTE: PROTOCOLO DE EUTANASIA — CYBERSTAN 2185</h3>
+      <div class="dm2">CLASIFICACIÓN: NIVEL NEGRO | MINISTERIO: DEFENSA / UNIDAD | FECHA: 2185</div>
+      <p>Durante la Reclamación Autómata en 2185, autoridades locales activaron el <strong style="color:#CC0000">Protocolo de Eutanasia Cyborg</strong> sin autorización pública conocida. El efecto secundario fue la esterilización completa de supervivientes. Sin capacidad reproductiva, los Cyborgs se extinguirán eventualmente.</p>
+      <p>El Ministerio mantiene que la acción fue motivada por compasión: <span class="rx">████████████████████████████████████████████████████████████████████</span>. Los registros del protocolo de autorización están sellados bajo <span class="rx">████████████████</span>.</p>
+      <div class="wb">⚠ La reproducción de este expediente constituye traición bajo §12-A del Código de Unidad Democrática.</div>
+    </div>
+  </div>
+</div>
+
+<!-- DENIED MODAL -->
+<div id="dm">
+  <div id="dmi">
+    <div class="dmt">
+      <h2>⛔ SISTEMA DE SEGURIDAD SEAF — VIOLACIÓN DETECTADA</h2>
+      <button class="dmcl" onclick="closeDenied()">✕</button>
+    </div>
+    <div class="dmb">
+      <span class="dmico" id="dmico">🔒</span>
+      <div class="dmcase">CASO REF: ██████-48-SE | MIN. DE LA VERDAD | SELLO ABSOLUTO</div>
+      <div class="dmtitle">ACCESO DENEGADO</div>
+      <div class="dmsub">Nivel OMEGA insuficiente.<br>Archivo bajo <strong style="color:#FF4444">SELLO ABSOLUTO DEL CONSEJO DEMOCRÁTICO</strong>.</div>
+      <div class="dmterm">
+        <div><span class="td2">SEAF-SEC v3.1 &gt;</span> VERIFICANDO CREDENCIALES...</div>
+        <div id="dt1" style="opacity:0"><span class="td2">SEAF-SEC v3.1 &gt;</span> NIVEL DETECTADO: <span class="tw2">OMEGA</span></div>
+        <div id="dt2" style="opacity:0"><span class="td2">SEAF-SEC v3.1 &gt;</span> NIVEL REQUERIDO: <span style="color:#FF0000;animation:blink .5s step-end infinite">ALFA-ROJO</span></div>
+        <div id="dt3" style="opacity:0"><span class="td2">SEAF-SEC v3.1 &gt;</span> RESULTADO: <span class="tw2 tb2">⚠ ACCESO DENEGADO ⚠</span></div>
+        <div id="dt4" style="opacity:0"><span class="td2">SEAF-SEC v3.1 &gt;</span> REGISTRADO: <span class="tw2" id="dts">--:--:--</span></div>
+        <div id="dt5" style="opacity:0"><span class="td2">SEAF-SEC v3.1 &gt;</span> NOTIFICANDO MINISTERIO DE UNIDAD...</div>
+      </div>
+      <div class="clbar">
+        <div class="clv">STD</div><div class="clv f">ALFA</div><div class="clv f">BETA</div>
+        <div class="clv f">OMEGA</div><div class="clv r">A-ROJO</div><div class="clv">CONSEJO</div>
+      </div>
+      <div class="dmstamp">DENEGADO</div>
+      <div class="dmwarn">Expediente sellado bajo <strong style="color:#770000">Directiva §48-C</strong> del Consejo Democrático. Todo intento registrado. Su ID ha sido transmitido al Oficial de Lealtad correspondiente.</div>
+      <button class="dmbtn" onclick="closeDenied()">ENTENDIDO — REPORTAR AL OFICIAL DE LEALTAD</button>
+    </div>
+  </div>
+</div>
+
+<!-- LORE MODAL -->
+<div id="lm">
+  <div id="lmi">
+    <button class="mclose" onclick="closeLore()">✕ CERRAR</button>
+    <h2 id="lmt"></h2>
+    <div class="lmb" id="lmb"></div>
+  </div>
+</div>
+
+<div class="footer">
+  FUERZAS ARMADAS DE SÚPER TIERRA — TERMINAL OPERACIONAL v4.7.2 | DEMOCRACIA GESTIONADA | AÑO GALÁCTICO 2185<br>
+  "LA LIBERTAD NO ES GRATUITA — CUESTA VIDAS. AFORTUNADAMENTE LAS VIDAS SON ABUNDANTES." — MINISTERIO DE LA VERDAD<br>
+  © Federación de Súper Tierra. Toda información es propiedad del Ministerio de la Verdad.
+</div>
+
+<script>
+// ─── BOOT ───
+window.addEventListener('load',()=>{
+  const ids=['bl0','bl1','bl2','bl3','bl4','bl5','bl6','bl7','bl8'];
+  const bar=document.getElementById('bbar');
+  let i=0;
+  function next(){
+    if(i<ids.length){
+      document.getElementById(ids[i]).classList.add('on');
+      bar.style.width=((i+1)/ids.length*100)+'%';
+      i++; setTimeout(next,200+Math.random()*160);
+    } else {
+      setTimeout(()=>{
+        const b=document.getElementById('boot');
+        b.style.opacity='0';
+        setTimeout(()=>{b.style.display='none';startNotifs();},800);
+      },500);
+    }
+  }
+  setTimeout(next,300);
+});
+
+// ─── CLOCK ───
+function updateClock(){
+  const n=new Date();
+  document.getElementById('clock').textContent=
+    String(n.getHours()).padStart(2,'0')+':'+
+    String(n.getMinutes()).padStart(2,'0')+':'+
+    String(n.getSeconds()).padStart(2,'0')+' UTC';
+}
+setInterval(updateClock,1000); updateClock();
+
+// ─── WAR COUNTERS ───
+const WC={k:8421774332,d:14892441,m:4822110,s:6744882};
+function fmtN(n){if(n>=1e9)return(n/1e9).toFixed(2)+'B';if(n>=1e6)return(n/1e6).toFixed(2)+'M';if(n>=1e3)return(n/1e3).toFixed(1)+'K';return n.toString();}
+function tickWC(){
+  WC.k+=Math.floor(Math.random()*400+70); WC.d+=Math.floor(Math.random()*11+1);
+  WC.m+=Math.floor(Math.random()*2); WC.s+=Math.floor(Math.random()*160+20);
+  document.getElementById('wck').textContent=fmtN(WC.k);
+  document.getElementById('wcd').textContent=fmtN(WC.d);
+  document.getElementById('wcm').textContent=fmtN(WC.m);
+  document.getElementById('wcs').textContent=fmtN(WC.s);
+}
+setInterval(tickWC,900);
+
+// ─── COUNT-UP ───
+function countUp(el,target,dur=1600){
+  let v=0;const step=target/dur*16;
+  const t=setInterval(()=>{v=Math.min(v+step,target);el.textContent=Math.floor(v).toLocaleString();if(v>=target)clearInterval(t);},16);
+}
+setTimeout(()=>{
+  countUp(document.getElementById('sk'),184432);
+  countUp(document.getElementById('sd'),47);
+  countUp(document.getElementById('sm'),2891);
+  countUp(document.getElementById('ss'),3304);
+  setTimeout(()=>document.getElementById('xpf').style.width='72%',400);
+},1200);
+
+// ─── TABS ───
+function sw(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ─── GALACTIC MAP ───
+const cv=document.getElementById('gc');
+const ctx=cv.getContext('2d');
+function rsz(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight||460;}
+rsz(); window.addEventListener('resize',()=>{rsz();buildPlanets();});
+const PN=['Heeth','Fenix Prime','Crimsica','Draupnir','Menkent','Tibit','Varylia 5','Malevelon Creek','Erata Prime','Troost','Martale','Turing','Penta','Ustotu','Marre','Acamar','Wezen','Shelia','Vernen','Oshaune','Redveil','Mortax','Veld','Aesria','Durgen Prime','Klen Dahth II','Esker','Tarsh','Nessa Prime','Gaellivare','Zagon Prime','Meridia','Matar Bay','Ingmar'];
+const PT=['terminid','terminid','terminid','terminid','automaton','automaton','automaton','automaton','liberated','liberated','liberated','contested','illuminate'];
+const PC={terminid:'#FF6600',automaton:'#CC0000',liberated:'#00CC44',contested:'#FF8C00',illuminate:'#8844FF',superearth:'#FFD700',cyberstan:'#BB3300'};
+let planets=[],tk=0;
+function buildPlanets(){
+  planets=[];
+  const W=cv.width,H=cv.height;
+  for(let i=0;i<90;i++){
+    const a=Math.random()*Math.PI*2,d=40+Math.random()*(Math.min(W,H)*.43);
+    planets.push({x:W/2+Math.cos(a)*d,y:H/2+Math.sin(a)*d,type:PT[Math.floor(Math.random()*PT.length)],r:2+Math.random()*2.4,name:PN[i%PN.length],sector:['Éfidas','Valdis','Lacaille','Mirin','Aurora Bay','Sol Central'][Math.floor(Math.random()*6)],threat:['BAJA','MEDIA','ALTA','CRÍTICA'][Math.floor(Math.random()*4)]});
+  }
+  const W=cv.width,H=cv.height;
+  planets.push({x:W/2,y:H/2,type:'superearth',r:10,name:'SÚPER TIERRA',sector:'Sol Central',threat:'NINGUNA'});
+  planets.push({x:W/2-W*.15,y:H/2-H*.12,type:'cyberstan',r:7,name:'CYBERSTAN',sector:'Lacaille',threat:'MUY ALTA'});
+  planets.push({x:W/2+W*.18,y:H/2-H*.08,type:'illuminate',r:5,name:'VARYLIA 5',sector:'Exterior',threat:'DESCONOCIDA'});
+}
+buildPlanets();
+function drawMap(){
+  const W=cv.width,H=cv.height;
+  if(!W||!H){requestAnimationFrame(drawMap);return;}
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<220;i++){const sx=(i*137.508*3.14)%W,sy=(i*97.31)%H,a=.14+(Math.sin(tk*.025+i)*.5+.5)*.33;ctx.fillStyle=`rgba(180,220,180,${a})`;ctx.fillRect(sx,sy,1,1);}
+  const ng=ctx.createRadialGradient(W/2,H/2,20,W/2,H/2,Math.min(W,H)*.47);
+  ng.addColorStop(0,'rgba(0,24,7,.52)');ng.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle=ng;ctx.fillRect(0,0,W,H);
+  for(let i=0;i<planets.length;i++)for(let j=i+1;j<planets.length;j++){const dx=planets[i].x-planets[j].x,dy=planets[i].y-planets[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<68){ctx.strokeStyle=`rgba(22,65,22,${.52*(1-d/68)})`;ctx.lineWidth=.5;ctx.beginPath();ctx.moveTo(planets[i].x,planets[i].y);ctx.lineTo(planets[j].x,planets[j].y);ctx.stroke();}}
+  planets.forEach(p=>{const c=PC[p.type]||'#888',pulse=p.type==='superearth'?(1+Math.sin(tk*.06)*.17):1;ctx.beginPath();ctx.arc(p.x,p.y,p.r*pulse,0,Math.PI*2);ctx.fillStyle=c;ctx.shadowColor=c;ctx.shadowBlur=p.type==='superearth'?20:(p.type==='cyberstan'?13:7);ctx.fill();ctx.shadowBlur=0;if(['superearth','cyberstan'].includes(p.type)){ctx.fillStyle='rgba(200,200,180,.72)';ctx.font=`${p.type==='superearth'?10:8}px Share Tech Mono`;ctx.fillText(p.name,p.x+p.r*pulse+4,p.y+3);}});
+  tk++;requestAnimationFrame(drawMap);
+}
+drawMap();
+cv.addEventListener('mousemove',e=>{
+  const r=cv.getBoundingClientRect();
+  const mx=(e.clientX-r.left)*(cv.width/r.width),my=(e.clientY-r.top)*(cv.height/r.height);
+  const tip=document.getElementById('ptip');let found=null;
+  for(const p of planets){const dx=mx-p.x,dy=my-p.y;if(Math.sqrt(dx*dx+dy*dy)<p.r+9){found=p;break;}}
+  if(found){
+    document.getElementById('ptn').textContent=found.name;
+    const fl={terminid:'Terminidos',automaton:'Autómatas',liberated:'Liberado',contested:'Disputado',illuminate:'Illuminados',superearth:'Súper Tierra',cyberstan:'Cyberstan'}[found.type]||found.type;
+    document.getElementById('ptb').innerHTML=`Sector: ${found.sector}<br>Control: ${fl}<br>Amenaza: ${found.threat}`;
+    tip.style.display='block';tip.style.left=(e.clientX+13)+'px';tip.style.top=(e.clientY-38)+'px';
+  } else tip.style.display='none';
+});
+cv.addEventListener('mouseleave',()=>document.getElementById('ptip').style.display='none');
+
+// ─── MISSIONS ───
+const MISSIONS=[
+  {title:'OPERACIÓN ESCUDO DE ACERO',planet:'Malevelon Creek',sector:'Valdis',faction:'Autómatas',fc:'#FF4444',timer:'14:22:08',diff:3,dl:'9 — HELLDIVE',req:[4500,'×3'],objs:['Destruir 3 fábricas de producción autómata','Extraer datos del núcleo central','Eliminar comandante de la Brigada Jet','Evacuar civiles SEAF atrapados']},
+  {title:'PURGA DE COLMENA — OP. TIFÓN',planet:'Fenix Prime',sector:'Éfidas',faction:'Terminidos',fc:'#FF8833',timer:'08:45:33',diff:2,dl:'6 — EXTREMO',req:[3200,'×2'],objs:['Destruir 5 nidos Terminidos nivel 4','Sellar 2 emergencias de colmena','Reactivar bombas de Elemento-710']},
+  {title:'RECONOCIMIENTO ILLUMINADO',planet:'Varylia 5',sector:'Exterior',faction:'Illuminados',fc:'#AA66FF',timer:'22:10:00',diff:3,dl:'10 — IMPOSIBLE',req:[5800,'×5'],objs:['Infiltrar posición avanzada Illuminada','Recuperar tecnología alienígena desconocida','Neutralizar disruptores psíquicos','Transmitir coordenadas al Destructor']},
+  {title:'PATRULLA DEMOCRÁTICA',planet:'Heeth',sector:'Sol Central',faction:'Terminidos',fc:'#FF8833',timer:'PERMANENTE',diff:1,dl:'2 — FÁCIL',req:[800,'×1'],objs:['Eliminar 30 Terminidos de clase baja','Completar extracción sin bajas']},
+  {title:'ASALTO A MEGAFÁBRICA CLASE 2',planet:'Cyberstan',sector:'Lacaille',faction:'Autómatas / Cyborgs',fc:'#FF4444',timer:'06:30:00',diff:3,dl:'8 — DIFÍCIL',req:[6000,'×4'],objs:['Infiltrar Megafábrica SOLIDARITET','Destruir núcleo de producción central','Rescatar Cuerpo 77 SEAF','Activar Directiva Terminal si necesario']},
+];
+const ml2=document.getElementById('mission-list');
+MISSIONS.forEach(m=>{
+  ml2.innerHTML+=`<div class="mc">
+    <div>
+      <h3>${m.title}</h3>
+      <div class="mc-meta">Planeta: <span style="color:var(--text-main)">${m.planet}</span> | Sector: ${m.sector}<br>Facción: <span style="color:${m.fc}">${m.faction}</span>${m.timer!=='PERMANENTE'?`<div class="mc-timer">⏱ ${m.timer}</div>`:''}</div>
+      <div class="objs">${m.objs.map(o=>`<div class="ob">${o}</div>`).join('')}</div>
+      <div class="mc-reward"><div class="rwc">💰 ${m.req[0]} REQ</div><div class="rwc">🏅 MEDALLA ${m.req[1]}</div></div>
+    </div>
+    <div><div class="mc-diff d${m.diff}">D: ${m.dl}</div></div>
+  </div>`;
+});
+
+// ─── STRATAGEMS ───
+const STRATS=[
+  {ico:'💥',name:'RAYO ORBITAL',type:'orbital',cat:'ORBITAL',cd:'3 CARGAS',keys:['↑','↓','↑']},
+  {ico:'🌑',name:'BARRAGE 380mm',type:'orbital',cat:'ORBITAL',cd:'5min CD',keys:['↓','↓','↑','↑']},
+  {ico:'☄',name:'CAÑÓN PRECISIÓN',type:'orbital',cat:'ORBITAL',cd:'2 CARGAS',keys:['↓','↓','↑','↓']},
+  {ico:'⚡',name:'RAYO EMS',type:'orbital',cat:'ORBITAL',cd:'RECARGA',keys:['↓','↓','←','↑']},
+  {ico:'🔥',name:'NAPALM ORBITAL',type:'orbital',cat:'ORBITAL',cd:'4min CD',keys:['↓','↑','↓','↓']},
+  {ico:'🦅',name:'EAGLE AIRSTRIKE',type:'eagle',cat:'EAGLE',cd:'3 CARGAS',keys:['↑','↓','↑','↓']},
+  {ico:'💣',name:'EAGLE 500KG',type:'eagle',cat:'EAGLE',cd:'1 CARGA',keys:['↑','↓','↑','↑','↓']},
+  {ico:'🔫',name:'EAGLE CLUSTER',type:'eagle',cat:'EAGLE',cd:'4 CARGAS',keys:['↑','↓','↑','↑']},
+  {ico:'🚀',name:'EAGLE ROCKETS',type:'eagle',cat:'EAGLE',cd:'3 CARGAS',keys:['↑','↓','↑','←']},
+  {ico:'🛡',name:'ESCUDO TESLA',type:'defense',cat:'DEFENSA',cd:'2 USOS',keys:['↓','←','↑','↑','←']},
+  {ico:'🧱',name:'CENTINELA AA',type:'defense',cat:'DEFENSA',cd:'1 USO',keys:['↓','←','↑','↑','→']},
+  {ico:'⚙',name:'SUPPORT PACK',type:'supply',cat:'SUMINISTRO',cd:'ILIMITADO',keys:['↓','↑','↓','↑']},
+  {ico:'🩹',name:'STIM PISTOL',type:'support',cat:'APOYO',cd:'3 CARGAS',keys:['↓','↓','↑','←','→']},
+  {ico:'🤖',name:'MECSUIT EXO-45',type:'support',cat:'APOYO',cd:'1 USO',keys:['↓','↑','←','↓','↑']},
+  {ico:'🧨',name:'ANTITANQUE EAT-17',type:'support',cat:'APOYO',cd:'2 CARGAS',keys:['↓','←','→','↑']},
+  {ico:'🗡',name:'LANZA LLAMAS',type:'support',cat:'APOYO',cd:'1 USO',keys:['↓','←','↓','↑']},
+  {ico:'💊',name:'RESUPPLY DROP',type:'supply',cat:'SUMINISTRO',cd:'2min CD',keys:['↓','↓','↑','→']},
+  {ico:'🔦',name:'BALIZA RECON',type:'support',cat:'APOYO',cd:'3 USOS',keys:['→','↑','→','↑']},
+];
+let sf_cur='all';
+const sfEl=document.getElementById('sf');
+['TODOS','ORBITAL','EAGLE','APOYO','DEFENSA','SUMINISTRO'].forEach((l,i)=>{
+  const types=['all','orbital','eagle','support','defense','supply'];
+  const b=document.createElement('button');
+  b.className='sfb'+(i===0?' active':'');
+  b.textContent=l;
+  b.onclick=()=>{sf_cur=types[i];document.querySelectorAll('.sfb').forEach(x=>x.classList.remove('active'));b.classList.add('active');renderStrats();};
+  sfEl.appendChild(b);
+});
+function renderStrats(){
+  const g=document.getElementById('stg');
+  const list=sf_cur==='all'?STRATS:STRATS.filter(s=>s.type===sf_cur);
+  g.innerHTML=list.map(s=>`<div class="stc" onclick="this.classList.toggle('sel')">
+    <div class="scat">${s.cat}</div>
+    <span class="si2">${s.ico}</span>
+    <div class="sn">${s.name}</div>
+    <div class="scd">${s.cd}</div>
+    <div class="skeys">${s.keys.map(k=>`<div class="sk">${k}</div>`).join('')}</div>
+  </div>`).join('');
+}
+renderStrats();
+
+// ─── BESTIARY ───
+const BEASTS=[
+  {ico:'🦟',name:'GUERRERO TERMINIDO',f:'t',fd:'Terminidos',desc:'Infantería básica. Rápidos en grupos. Caparazón resistente en zonas vitales.',stats:{Velocidad:'Alta',Armadura:'Ligera',Peligro:'Medio',Especial:'Veneno'},th:'tm'},
+  {ico:'🕷',name:'ESCUPE-BILIS',f:'t',fd:'Terminidos',desc:'Artillería biológica. Dispara ácido corrosivo a largas distancias. Prioritario en extracción.',stats:{Velocidad:'Media',Armadura:'Media',Peligro:'Alto',Especial:'Ácido'},th:'th'},
+  {ico:'🦖',name:'BILE TITAN',f:'t',fd:'Terminidos',desc:'Colosal bestia terminida. Requiere armamento pesado. Puede destruir naves de apoyo.',stats:{Velocidad:'Lenta',Armadura:'Pesada',Peligro:'Extremo',Especial:'Bilis'},th:'th'},
+  {ico:'👾',name:'CHARGER',f:'t',fd:'Terminidos',desc:'Carga a gran velocidad aplastando todo. Ataques frontales inefectivos. Apuntar patas.',stats:{Velocidad:'Muy alta',Armadura:'Frontal dura',Peligro:'Alto',Especial:'Carga'},th:'th'},
+  {ico:'🤖',name:'DEVASTADOR',f:'a',fd:'Autómatas',desc:'Infantería mediana con escudo frontal. Flanquear para efectividad máxima.',stats:{Velocidad:'Media',Armadura:'Media',Peligro:'Medio',Especial:'Escudo'},th:'tm'},
+  {ico:'🦾',name:'STRIDER',f:'a',fd:'Autómatas',desc:'Mech bípedo con cañón integrado. Extremadamente resistente. Objetivo: articulaciones.',stats:{Velocidad:'Media',Armadura:'Pesada',Peligro:'Alto',Especial:'Cañón'},th:'th'},
+  {ico:'🚁',name:'DROPSHIP AUTÓMATA',f:'a',fd:'Autómatas',desc:'Nave de desembarco. Destruirla antes del desembarco elimina hasta 6 unidades.',stats:{Velocidad:'Alta',Armadura:'Media',Peligro:'Alto',Especial:'Refuerzos'},th:'th'},
+  {ico:'🔴',name:'HULK',f:'a',fd:'Autómatas',desc:'Mech pesado de 4m. Dos cañones de plasma. Punto débil: sensor en la espalda.',stats:{Velocidad:'Lenta',Armadura:'Muy pesada',Peligro:'Extremo',Especial:'Plasma'},th:'th'},
+  {ico:'👁',name:'OBSERVADOR ILLUMINADO',f:'i',fd:'Illuminados',desc:'Reconocimiento avanzado con transmisión instantánea a la flota madre.',stats:{Velocidad:'Alta',Armadura:'Ligera',Peligro:'Medio',Especial:'Teletransporte'},th:'tm'},
+  {ico:'🌀',name:'DISRUPTOR PSÍQUICO',f:'i',fd:'Illuminados',desc:'Interferencia de comunicaciones y desorientación táctica del escuadrón.',stats:{Velocidad:'Media',Armadura:'Ligera',Peligro:'Alto',Especial:'Psíquico'},th:'th'},
+];
+const bg2=document.getElementById('bgrid');
+BEASTS.forEach(b=>{
+  const fc=b.f==='t'?'bf-t':b.f==='a'?'bf-a':'bf-i';
+  bg2.innerHTML+=`<div class="bc">
+    <div class="bc-hdr"><div class="bc-icon">${b.ico}</div><div class="bc-info"><h3>${b.name}</h3><span class="bcf ${fc}">${b.fd}</span></div></div>
+    <div class="bc-body">${b.desc}
+      <div class="bst-g">${Object.entries(b.stats).map(([k,v])=>`<div class="bst"><span>${k}</span><span class="bstv">${v}</span></div>`).join('')}</div>
+      <div style="margin-top:6px;font-size:8px;color:var(--text-dim)">AMENAZA: <span class="tpip ${b.th}"></span>${b.th==='tl'?'BAJA':b.th==='tm'?'MEDIA':'ALTA'}</div>
+    </div>
+  </div>`;
+});
+
+// ─── INTEL ───
+const INTEL=[
+  {title:'ESTADO DE GUERRA',rows:[['Planetas totales','261'],['Control SE','92 (35%)','ok'],['Bajo amenaza','169 (65%)','danger'],['Helldivers activos','842,331','ok'],['Bajas esta semana','1,248,992','warn'],['Misiones completadas','4,822,110','ok']]},
+  {title:'FACCIONES ENEMIGAS',rows:[['Terminidos — planetas','78','warn'],['Autómatas — planetas','91','danger'],['Illuminados detectados','~12'],['Brigada Jet','ACTIVA','danger'],['Flota de Hierro','NEUTRALIZADA','ok'],['Legión Cyborg','LIBERADA','warn']]},
+  {title:'RECURSOS ESTRATÉGICOS',rows:[['Reservas E-710','43% cap.','warn'],['Producción semanal','+2.4M barriles','ok'],['Aleación de titanio','BAJA','danger'],['Destructores sup.','12,440','ok'],['Estaciones Battle','8 activas','ok'],['Permisos C-01','Procesando']]},
+  {title:'OPERACIONES',rows:[['Op. Escudo Eterno','EN CURSO','ok'],['Op. Pretext Válido','PARCIAL','warn'],['Op. Cierre Valiente','COMPLETADA','ok'],['Op. Paz Duradera','COMPLETADA','ok'],['Op. Desmontaje Veloz','COMPLETADA','ok'],['Directiva Terminal','EN RESERVA','danger']]},
+  {title:'ESTADO POLÍTICO',rows:[['Democracia Gestionada','ESTABLE','ok'],['Min. de la Verdad','ACTIVO','ok'],['Min. de Unidad','ACTIVO','ok'],['Disidentes','2,841','warn'],['Simpatizantes Cyborg','VIGILADOS','danger'],['Elecciones','ALGORÍTMICAS']]},
+  {title:'ARMAMENTO',rows:[['AR-23 Liberator','ESTÁNDAR'],['EAT-17 Antitanque','DESPLEGADO','ok'],['Stratagemas Eagle','DISPONIBLES','ok'],['Apoyo orbital','12 tipos','ok'],['Armadura FS-38','STOCK BAJO','warn'],['Mech EXO-45','LIMITADO','warn']]},
+];
+const ig2=document.getElementById('igrid');
+INTEL.forEach(c=>{ig2.innerHTML+=`<div class="ic"><h3>${c.title}</h3>${c.rows.map(r=>`<div class="ir"><span class="il">${r[0]}</span><span class="iv ${r[2]||''}">${r[1]}</span></div>`).join('')}</div>`;});
+
+// ─── LORE ───
+const LORE=[
+  {ico:'🌍',title:'DEMOCRACIA GESTIONADA',tag:'POLÍTICA',new:false,preview:'El sistema de gobierno único de Súper Tierra.',body:`<p>La <strong>Democracia Gestionada</strong>: los ciudadanos completan un formulario cuyas respuestas son procesadas por un algoritmo que determina su voto. El resultado siempre refleja la voluntad del Consejo. Los Ministerios de la Verdad y Unidad supervisan el pensamiento y la memoria de los ciudadanos. Los signos de disidencia incluyen "cortes de cabello poco convencionales" y "cuestionamiento de narrativas oficiales".</p>`},
+  {ico:'⚔',title:'PRIMERA GUERRA GALÁCTICA',tag:'HISTORIA',new:false,preview:'2044–2084: bugs, cyborgs e illuminados.',body:`<p>La Primera Guerra Galáctica (2044–2084) contra Bugs, Illuminados y Cyborgs. Aunque presentada como defensiva, la evidencia indica lo contrario: los Bugs habitaban planetas ricos en E-710, los Illuminados ofrecieron paz primero, y los Cyborgs declararon independencia pacífica. El incidente del Distrito 48 sirvió de pretexto para la guerra.</p>`},
+  {ico:'🐛',title:'LOS TERMINIDOS',tag:'FACCIONES',new:false,preview:'Insectoides cultivados como recurso energético.',body:`<p>Los Terminidos producen <strong>Elemento-710</strong> al morir. Súper Tierra los domesticó para cultivarlos. Para 2184 las granjas genéticamente modificadas colapsaron, liberando los Terminidos en el este galáctico. El nombre E-710, invertido, forma "OIL".</p>`},
+  {ico:'🤖',title:'LOS AUTÓMATAS',tag:'FACCIONES',new:false,preview:'El ejército mecánico hijo de los Cyborgs.',body:`<p>Los Autómatas emergieron del oeste galáctico en 2184 — denominados "Los Hijos de los Cyborgs". Su campaña fue eficiente y brutal. La Brigada Jet usa mochilas de salto de Helldivers caídos. El Ministerio los clasifica como "Comunistas".</p>`},
+  {ico:'👁',title:'LOS ILLUMINADOS',tag:'FACCIONES',new:true,preview:'La civilización más avanzada, erróneamente declarada extinta.',body:`<p>Los Illuminados intentaron un acuerdo de paz antes del primer ataque humano. Fueron declarados extintos al final de la Primera Guerra Galáctica. Para 2185 reaparecieron con tecnología aún más avanzada. Sus capacidades incluyen distorsión psíquica e invisibilidad.</p>`},
+  {ico:'🦾',title:'LOS CYBORGS DE CYBERSTAN',tag:'HISTORIA',new:false,preview:'Humanos modificados cuya historia está ligada al Distrito 48.',body:`<p>Los Cyborgs eran ciudadanos de Súper Tierra que adoptaron cibernética y Socialismo. Probablemente mineros que se modificaron para sobrevivir Cyberstan. En 2185 el Protocolo de Eutanasia fue activado durante la Reclamación, esterilizando a los supervivientes.</p>`},
+  {ico:'⛽',title:'ELEMENTO-710',tag:'RECURSOS',new:false,preview:'El combustible que impulsa la economía galáctica.',body:`<p>El Elemento-710 — "OIL" invertido — es el principal combustible hiperlumínico. Las granjas de Terminidos colapasaron en 2184. Las reservas actuales están al 43% de capacidad. Súper Tierra no puede exterminar a todos los Terminidos: los necesita como recurso.</p>`},
+  {ico:'🪖',title:'LOS HELLDIVERS',tag:'FUERZAS SEAF',new:false,preview:'Tropas de élite lanzadas desde órbita.',body:`<p>Los Helldivers se insertan mediante Hellpods lanzados desde órbita. Operan desde Destructores Superiores. Solicitan Estratagemas coordinadas por Eagle-1. La tasa de supervivencia en dificultad máxima es clasificada como "estadísticamente irrelevante para los objetivos de la misión".</p>`},
+  {ico:'🏛',title:'LOS MINISTERIOS',tag:'GOBIERNO',new:false,preview:'Los órganos que mantienen la Democracia Gestionada.',body:`<p>El Ministerio de la Verdad gestiona la información y aprueba los recuerdos. El Ministerio de Unidad monitorea disidencia. El Ministerio de Inteligencia opera en secreto. El Ministerio de Prosperidad gestiona la economía. Todos responden al Consejo Democrático y son designados algorítmicamente.</p>`},
+];
+const lg2=document.getElementById('lgrid');
+LORE.forEach((l,i)=>{lg2.innerHTML+=`<div class="lc" onclick="openLore(${i})">${l.new?'<div class="lc-new">NUEVO</div>':''}<div class="lc-ico">${l.ico}</div><h3>${l.title}</h3><p>${l.preview}</p><div class="lc-tag">▸ ${l.tag}</div></div>`;});
+function openLore(i){document.getElementById('lmt').textContent=LORE[i].title;document.getElementById('lmb').innerHTML=LORE[i].body;document.getElementById('lm').classList.add('open');}
+function closeLore(){document.getElementById('lm').classList.remove('open');}
+document.getElementById('lm').addEventListener('click',e=>{if(e.target===document.getElementById('lm'))closeLore();});
+
+// ─── PROPAGANDA ───
+const PROPS=[
+  {cls:'pd',p:'🌍',q:'"La Democracia Gestionada es la perfección política. El algoritmo siempre sabe lo que el pueblo quiere antes que el propio pueblo."',a:'MINISTERIO DE LA VERDAD — DECRETO 2184-07'},
+  {cls:'pw',p:'⚔',q:'"Cada Terminido muerto es un barril de combustible para la Libertad. Cada Autómata destruido es un voto por la Democracia. Lucha. Muere. Repite."',a:'GENERAL BRASCH — HELLDIVERS BULLETIN VOL. 48'},
+  {cls:'pe',p:'🪖',q:'"¿Amas la Libertad? Enróltate hoy. Gratis los primeros 30 días o hasta tu muerte, lo que ocurra primero."',a:'SEAF — CAMPAÑA DE RECLUTAMIENTO 2185'},
+  {cls:'pd',p:'🗳',q:'"Votar es el acto más sagrado de la Democracia Gestionada. El algoritmo ha determinado que usted votará correctamente. Gracias por su participación."',a:'CONSEJO DEMOCRÁTICO — AVISO ELECTORAL ANUAL'},
+  {cls:'pw',p:'💥',q:'"Los Autómatas son Comunistas. Los Terminidos son anarquistas biológicos. Los Illuminados son extremistas interdimensionales. Todas estas afirmaciones verificadas por el Ministerio de la Verdad."',a:'MINISTERIO DE UNIDAD — INFORME Q3-2185'},
+  {cls:'pe',p:'🦅',q:'"¿Cuántas vidas vale la Libertad? Todas las tuyas. Tu familia recibirá una placa conmemorativa de bronce."',a:'SEAF — FOLLETO DE BENEFICIOS PARA FAMILIARES'},
+];
+const pg2=document.getElementById('pgrid');
+PROPS.forEach(p=>{pg2.innerHTML+=`<div class="pc ${p.cls}"><span class="pp">${p.p}</span><div class="pq">${p.q}</div><div class="pa">— ${p.a}</div><div class="pb2" onclick="this.textContent=this.textContent==='POR LA DEMOCRACIA ★'?'COMPARTIR':'POR LA DEMOCRACIA ★'">COMPARTIR PROPAGANDA</div></div>`;});
+
+// ─── TERMINAL ───
+const CMDS={
+  help:()=>[{t:'ts',m:'Comandos disponibles:'},...['status','planets','factions','mission list','lore','helldiver','democracy','clear'].map(c=>({t:'tl2',m:'  '+c}))],
+  status:()=>[{t:'ts',m:'ESTADO DEL SISTEMA'},{t:'tl2',m:'Guerra Galáctica II: ACTIVA'},{t:'tl2',m:'Helldivers operativos: 842,331'},{t:'tl2',m:'Malevelon Creek: ASEDIADO'},{t:'tl2',m:'E-710 reservas: 43%'},{t:'te',m:'⚠ Brigada Jet detectada en Sector Valdis'}],
+  planets:()=>[{t:'ts',m:'PLANETAS BAJO CONTROL SE (selección):'},...['Heeth','Fenix Prime','Menkent','Vernen Wells','Acamar','Turing'].map((p,i)=>({t:'tl2',m:`[${i+1}] ${p}`}))],
+  factions:()=>[{t:'ts',m:'FACCIONES ACTIVAS:'},{t:'tl2',m:'• Terminidos: 78 planetas — ALTA'},{t:'te',m:'• Autómatas: 91 planetas — CRÍTICA'},{t:'tl2',m:'• Illuminados: ~12 detectados — MEDIA'}],
+  'mission list':()=>MISSIONS.map((m,i)=>({t:i%2===0?'tl2':'ts',m:`[${i+1}] ${m.title} — ${m.planet} (D${m.diff*3})`})),
+  lore:()=>LORE.map((l,i)=>({t:'tl2',m:`[${i+1}] ${l.title}`})),
+  helldiver:()=>[{t:'ts',m:'PERFIL:'},{t:'tl2',m:'ID: HD-4892 "IRON LIBERTY"'},{t:'tl2',m:'Rango: CABO MAYOR ★★★'},{t:'tl2',m:'Bajas: 184,432'},{t:'tl2',m:'Misiones: 2,891'},{t:'tl2',m:'Estado: ACTIVO — POR LA DEMOCRACIA'}],
+  democracy:()=>[{t:'ts',m:'DEMOCRACIA GESTIONADA:'},{t:'tl2',m:'"La Democracia no es un derecho."'},{t:'tl2',m:'"Es un privilegio que se gana."'},{t:'tl2',m:'"Con cada Terminido muerto."'},{t:'te',m:'Mensaje aprobado por el Ministerio de la Verdad.'}],
+};
+const tout=document.getElementById('tout');
+const ti=document.getElementById('ti');
+function tprint(lines){lines.forEach(l=>{const d=document.createElement('div');d.className=l.t;d.textContent=l.m;tout.appendChild(d);});tout.scrollTop=tout.scrollHeight;}
+tprint([{t:'ts',m:'SEAF TERMINAL v4.7.2 — HELLDIVERS DIVISIÓN'},{t:'ts',m:'Bienvenido, HD-4892. Democracia sea con usted.'},{t:'tl2',m:'Escriba "help" para ver comandos disponibles.'},{t:'ts',m:'─'.repeat(38)}]);
+ti.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const cmd=ti.value.trim().toLowerCase(); ti.value='';
+    if(!cmd)return;
+    const d=document.createElement('div');d.className='tc';d.textContent='SEAF@terminal:~$ '+cmd;tout.appendChild(d);
+    if(cmd==='clear'){tout.innerHTML='';return;}
+    const fn=CMDS[cmd];
+    if(fn)tprint(fn());
+    else tprint([{t:'te',m:'Comando no reconocido: "'+cmd+'". Escriba "help".'},{t:'te',m:'Este intento ha sido registrado.'}]);
+    tout.scrollTop=tout.scrollHeight;
+  }
+});
+
+// ─── CLASSIFIED AUTH ───
+function tryAuth(){
+  const u=document.getElementById('au').value.trim().toUpperCase();
+  const p=document.getElementById('ap').value.trim().toUpperCase();
+  const err=document.getElementById('aerr');
+  if(['HD-0048','HELLDIVER','HD-4892'].includes(u)&&['OMEGA','DEMOCRACIA','2184'].includes(p)){
+    document.getElementById('clw').style.display='none';
+    document.getElementById('clc').style.display='block';
+    showNotif('✓ ACCESO CONCEDIDO','Bienvenido, Helldiver. Archivos nivel negro disponibles.','');
+  } else {
+    err.style.display='block'; setTimeout(()=>err.style.display='none',3000);
+    document.getElementById('ap').value=''; document.getElementById('ap').focus();
+    showNotif('⚠ ACCESO DENEGADO','Credenciales inválidas. Intento registrado.','nw');
+  }
+}
+document.getElementById('ap').addEventListener('keydown',e=>{if(e.key==='Enter')tryAuth();});
+document.getElementById('au').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('ap').focus();});
+
+// ─── DENIED MODAL ───
+function openDenied(){
+  document.getElementById('dm').classList.add('open');
+  const now=new Date();
+  document.getElementById('dts').textContent=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+  const ico=document.getElementById('dmico');
+  ico.textContent='🔒';ico.style.animation='none';void ico.offsetWidth;ico.style.animation='dsh .5s ease-in-out';
+  ['dt1','dt2','dt3','dt4','dt5'].forEach(id=>document.getElementById(id).style.opacity='0');
+  let i=0;const ids=['dt1','dt2','dt3','dt4','dt5'];
+  function rev(){if(i<ids.length){document.getElementById(ids[i]).style.opacity='1';i++;setTimeout(rev,360+Math.random()*160);}}
+  setTimeout(rev,220);
+  showNotif('⛔ VIOLACIÓN DE SEGURIDAD','Intento de acceso a expediente ALFA-ROJO registrado.','nd');
+}
+function closeDenied(){document.getElementById('dm').classList.remove('open');}
+document.getElementById('dm').addEventListener('click',e=>{if(e.target===document.getElementById('dm'))closeDenied();});
+
+// ─── NOTIFICATIONS ───
+function showNotif(title,msg,type){
+  const cont=document.getElementById('nc');
+  const n=document.createElement('div');
+  n.className='notif'+(type?' '+type:'');
+  n.innerHTML=`<div class="notif-t">${title}</div><div class="notif-m">${msg}</div>`;
+  cont.appendChild(n);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>n.classList.add('show')));
+  setTimeout(()=>{n.classList.remove('show');setTimeout(()=>n.remove(),400);},5500);
+}
+const NOTIFS=[
+  {t:'ALERTA DE GUERRA',m:'Sector Valdis: 3 planetas perdidos en las últimas 2h.',tp:'nd',d:4000},
+  {t:'OPERACIÓN ACTIVA',m:'Op. Escudo Eterno: 41,220 Helldivers en campo.',tp:'',d:9000},
+  {t:'ELEMENTO-710',m:'Producción en Éfidas comprometida. Refuerzos requeridos.',tp:'nw',d:15000},
+  {t:'INTELIGENCIA',m:'Movimiento Illuminado en sector exterior.',tp:'nw',d:22000},
+  {t:'RECLUTAMIENTO',m:'¿Quieres saber más? Únete a los Helldivers hoy.',tp:'',d:30000},
+  {t:'CYBERSTAN',m:'Operaciones en Megafábrica SOLIDARITET en curso.',tp:'nw',d:38000},
+  {t:'AMENAZA CONFIRMADA',m:'Bile Titan avistado en zona de extracción activa.',tp:'nd',d:48000},
+];
+function startNotifs(){NOTIFS.forEach(n=>setTimeout(()=>showNotif(n.t,n.m,n.tp),n.d));}
+
+// ─── GLITCH HEADER ───
+setInterval(()=>{
+  const el=document.querySelector('#hdr-title .main');
+  if(!el)return;
+  if(Math.random()<0.04){el.classList.add('glitch-txt');setTimeout(()=>el.classList.remove('glitch-txt'),600);}
+},2000);
+
+// ─── ALERT FEED ───
+const ALERTS=[
+  {time:'14:22',tag:'CRÍTICO',cls:'af-crit',msg:'Sector Valdis: Brigada Jet avanzando. 3 planetas en riesgo.'},
+  {time:'14:18',tag:'ALERTA',cls:'af-warn',msg:'Fenix Prime: emergencia de colmena en coordenadas 77-N.'},
+  {time:'14:09',tag:'INFO',cls:'af-ok',msg:'Operación Escudo Eterno: objetivo secundario completado.'},
+  {time:'14:01',tag:'CRÍTICO',cls:'af-crit',msg:'Illuminados detectados en sector exterior — clase no identificada.'},
+  {time:'13:55',tag:'ALERTA',cls:'af-warn',msg:'Reservas E-710 en Éfidas al 31%. Producción comprometida.'},
+  {time:'13:48',tag:'INFO',cls:'af-ok',msg:'842,331 Helldivers operativos en campo galáctico.'},
+  {time:'13:41',tag:'ALERTA',cls:'af-warn',msg:'Cyberstan: actividad Autómata anómala en grid 4-4-F.'},
+];
+function buildAlertFeed(){
+  const el=document.getElementById('af-inner');
+  el.innerHTML=ALERTS.map(a=>`<div class="af-row"><span class="af-time">${a.time}</span><span class="af-tag ${a.cls}">${a.tag}</span><span class="af-msg">${a.msg}</span></div>`).join('');
+}
+buildAlertFeed();
+let alertOpen=false;
+function toggleAlertFeed(){
+  alertOpen=!alertOpen;
+  document.getElementById('alert-feed').classList.toggle('open',alertOpen);
+  document.getElementById('at-label').textContent=alertOpen?'▴ FEED DE ALERTAS — OCULTAR':'▾ FEED DE ALERTAS EN VIVO — 7 INCIDENTES RECIENTES';
+}
+// Auto-add new alert every 25s
+setInterval(()=>{
+  const now=new Date();const t=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const rnd=[
+    {tag:'CRÍTICO',cls:'af-crit',msg:'Nuevo frente abierto: Autómatas en sector Aurora Bay.'},
+    {tag:'ALERTA',cls:'af-warn',msg:'Hellpod perdido en coordenadas clasificadas — búsqueda activa.'},
+    {tag:'INFO',cls:'af-ok',msg:'Refuerzos SEAF desplegados: 12,400 nuevos reclutas activos.'},
+    {tag:'CRÍTICO',cls:'af-crit',msg:'Bile Titan de clase S detectado en Éfidas — evacuación iniciada.'},
+  ];
+  const item=rnd[Math.floor(Math.random()*rnd.length)];
+  ALERTS.unshift({time:t,...item});if(ALERTS.length>10)ALERTS.pop();
+  buildAlertFeed();
+  showNotif('⚡ '+item.tag,item.msg,item.cls==='af-crit'?'nd':item.cls==='af-warn'?'nw':'');
+},25000);
+
+// ─── ARMORY ───
+const WEAPONS=[
+  {ico:'🔫',name:'AR-23 LIBERATOR',type:'at-p',td:'PRIMARIA',desc:'Rifle de asalto estándar de los Helldivers. Fiable en todo terreno.',stats:{DMG:55,CAP:75,RNG:60,RLD:65,PEN:20},tags:['AUTOMÁTICO','VERSÁTIL','ESTÁNDAR']},
+  {ico:'🔫',name:'SG-8 PUNISHER',type:'at-p',td:'PRIMARIA',desc:'Escopeta de bombeo. Devastadora a corta distancia.',stats:{DMG:88,CAP:35,RNG:20,RLD:40,PEN:15},tags:['CORTO ALCANCE','ALTO DAÑO']},
+  {ico:'⚡',name:'LAS-5 SCYTHE',type:'at-p',td:'PRIMARIA',desc:'Rifle láser con refrigeración pasiva. Sin munición.',stats:{DMG:60,CAP:99,RNG:70,RLD:99,PEN:30},tags:['LÁSER','SIN MUNICIÓN','SOBRECALENTAMIENTO']},
+  {ico:'💥',name:'R-63 DILIGENCE',type:'at-p',td:'PRIMARIA',desc:'Rifle de precisión para eliminaciones a larga distancia.',stats:{DMG:75,CAP:40,RNG:95,RLD:55,PEN:45},tags:['PRECISIÓN','SEMIAUTOMÁTICO','LARGO ALCANCE']},
+  {ico:'🔫',name:'SMG-37 DEFENDER',type:'at-p',td:'PRIMARIA',desc:'Subfusil compacto. Excelente movilidad.',stats:{DMG:40,CAP:80,RNG:35,RLD:75,PEN:10},tags:['COMPACTO','MOVILIDAD']},
+  {ico:'🔫',name:'P-2 PEACEMAKER',type:'at-s',td:'SECUNDARIA',desc:'Pistola reglamentaria SEAF. Siempre disponible.',stats:{DMG:35,CAP:45,RNG:30,RLD:70,PEN:8},tags:['PISTOLA','REGLAMENTARIA']},
+  {ico:'💢',name:'P-19 REDEEMER',type:'at-s',td:'SECUNDARIA',desc:'Pistola automática de alto cadencia.',stats:{DMG:28,CAP:85,RNG:25,RLD:65,PEN:5},tags:['PISTOLA','AUTOMÁTICA','CADENCIA ALTA']},
+  {ico:'🟡',name:'G-12 HIGH EXPLOSIVE',type:'at-g',td:'GRANADA',desc:'Granada fragmentaria de alto explosivo. Radio amplio.',stats:{DMG:90,CAP:50,RNG:40,RLD:99,PEN:55},tags:['EXPLOSIVO','RADIO AMPLIO']},
+  {ico:'💀',name:'G-16 IMPACT',type:'at-g',td:'GRANADA',desc:'Detona al impacto. Inmediata y precisa.',stats:{DMG:85,CAP:50,RNG:50,RLD:99,PEN:50},tags:['IMPACTO INMEDIATO']},
+  {ico:'🔵',name:'SH-20 BALLISTIC SHIELD',type:'at-sup',td:'SOPORTE',desc:'Escudo antibalas. Protección frontal total.',stats:{DMG:0,CAP:99,RNG:0,RLD:99,PEN:0},tags:['DEFENSA','ESCUDO']},
+  {ico:'🎯',name:'FAF-14 SPEAR',type:'at-sup',td:'SOPORTE',desc:'Lanzacohetes de guía láser. Anti-armadura.',stats:{DMG:95,CAP:20,RNG:90,RLD:30,PEN:95},tags:['ANTITANQUE','GUÍA LÁSER','LARGO ALCANCE']},
+  {ico:'⚙',name:'MG-43 MACHINE GUN',type:'at-sup',td:'SOPORTE',desc:'Ametralladora pesada. Requiere montaje.',stats:{DMG:70,CAP:90,RNG:65,RLD:35,PEN:40},tags:['AMETRALLADORA','PESADA','SUPRESIÓN']},
+];
+let armSelected=null;
+const armGrid=document.getElementById('arm-grid');
+WEAPONS.forEach((w,i)=>{
+  const statKeys={DMG:'abf-d',CAP:'abf-c',RNG:'abf-r',RLD:'abf-rl',PEN:'abf-p'};
+  const statLabels={DMG:'DAÑO',CAP:'CAPACIDAD',RNG:'ALCANCE',RLD:'RECARGA',PEN:'PENETRACIÓN'};
+  armGrid.innerHTML+=`<div class="arm-card" id="arm-${i}" onclick="selectWeapon(${i})">
+    <div class="arm-top">
+      <div class="arm-ico">${w.ico}</div>
+      <div class="arm-info">
+        <div class="arm-name">${w.name}</div>
+        <span class="arm-type ${w.type}">${w.td}</span>
+      </div>
+    </div>
+    <div class="arm-desc">${w.desc}</div>
+    <div class="arm-stats">
+      ${Object.entries(w.stats).map(([k,v])=>`<div class="asr">
+        <span class="asl">${statLabels[k]}</span>
+        <div class="ab"><div class="abf ${statKeys[k]}" style="width:0%" data-w="${v}%"></div></div>
+        <span class="av">${v}</span>
+      </div>`).join('')}
+    </div>
+    <div class="arm-tags">${w.tags.map(t=>`<span class="arm-tag">${t}</span>`).join('')}</div>
+  </div>`;
+});
+// Animate bars when armory tab opens
+function animateArmBars(){
+  document.querySelectorAll('.abf[data-w]').forEach(b=>{
+    b.style.width='0%';
+    setTimeout(()=>b.style.width=b.getAttribute('data-w'),80+Math.random()*200);
+  });
+}
+function selectWeapon(i){
+  document.querySelectorAll('.arm-card').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('arm-'+i).classList.add('sel');
+  const w=WEAPONS[i];
+  const panel=document.getElementById('arm-selected');
+  document.getElementById('asp-title').textContent=w.ico+' '+w.name+' — '+w.td;
+  document.getElementById('asp-body').innerHTML=`<strong style="color:var(--gold)">${w.desc}</strong><br><br>Tags: ${w.tags.map(t=>`<span class="arm-tag">${t}</span>`).join(' ')}<br><br>Daño: ${w.stats.DMG} | Capacidad: ${w.stats.CAP} | Alcance: ${w.stats.RNG} | Recarga: ${w.stats.RLD} | Penetración: ${w.stats.PEN}`;
+  panel.classList.add('show');
+  armSelected=i;
+}
+// Patch sw() to animate bars on armory open
+const _origSw=window.sw;
+window.sw=function(id,el){
+  _origSw(id,el);
+  if(id==='armory')setTimeout(animateArmBars,50);
+  if(id==='leaderboard'){renderLB();document.getElementById('lb-upd-time').textContent=new Date().toTimeString().slice(0,8);}
+};
+
+// ─── CODEX ───
+const BIOMES=['ÁRIDO','GLACIAL','SELVA','VOLCÁNICO','TUNDRA','OCEÁNICO','DESIERTO'];
+const SECTORS=['Éfidas','Valdis','Lacaille','Mirin','Aurora Bay','Sol Central','Exterior'];
+const CODEX_DATA=[];
+const CP_NAMES=['Heeth','Fenix Prime','Crimsica','Draupnir','Menkent','Tibit','Varylia 5','Malevelon Creek','Erata Prime','Troost','Martale','Turing','Penta','Ustotu','Marre','Acamar','Wezen','Shelia','Vernen','Oshaune','Redveil','Mortax','Veld','Aesria','Durgen Prime','Klen Dahth II','Esker','Tarsh','Nessa Prime','Gaellivare','Zagon Prime','Meridia','Matar Bay','Ingmar','Cyberstan','Moradesh','Bore Rock','Ery Prime','Nabatea Vex','Fori Prime'];
+const CP_STATUS=['terminid','terminid','terminid','terminid','automaton','automaton','automaton','liberated','liberated','contested','illuminate'];
+const CP_THREATS=[1,2,3,4,5];
+const TH_MAP={terminid:'cs-t',automaton:'cs-a',liberated:'cs-l',contested:'cs-c',illuminate:'cs-i'};
+const TH_LABEL={terminid:'TERMINIDOS',automaton:'AUTÓMATAS',liberated:'LIBERADO',contested:'DISPUTADO',illuminate:'ILLUMINADOS'};
+CP_NAMES.forEach((n,i)=>{
+  const st=CP_STATUS[i%CP_STATUS.length];
+  const thr=CP_THREATS[Math.floor(Math.random()*CP_THREATS.length)];
+  CODEX_DATA.push({name:n,sector:SECTORS[i%SECTORS.length],status:st,threat:thr,biome:BIOMES[Math.floor(Math.random()*BIOMES.length)],e710:Math.floor(Math.random()*100)+'%',hd:Math.floor(Math.random()*50000).toLocaleString()});
+});
+let codexFilter='all';let codexSort='name';let codexSortDir=1;
+function setCodexFilter(f,btn){
+  codexFilter=f;
+  document.querySelectorAll('.codex-fb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCodex();
+}
+function sortCodex(col){
+  if(codexSort===col)codexSortDir*=-1;
+  else{codexSort=col;codexSortDir=1;}
+  renderCodex();
+}
+function renderCodex(){
+  const q=document.getElementById('codex-search').value.toLowerCase();
+  let data=CODEX_DATA.filter(p=>{
+    const matchF=codexFilter==='all'||p.status===codexFilter;
+    const matchQ=!q||p.name.toLowerCase().includes(q)||p.sector.toLowerCase().includes(q)||p.biome.toLowerCase().includes(q);
+    return matchF&&matchQ;
+  });
+  data.sort((a,b)=>{
+    const av=a[codexSort]||'',bv=b[codexSort]||'';
+    if(typeof av==='number')return(av-bv)*codexSortDir;
+    return av.toString().localeCompare(bv.toString())*codexSortDir;
+  });
+  document.getElementById('codex-count').textContent=data.length+' planetas';
+  const clsMap={terminid:'cs-t',automaton:'cs-a',liberated:'cs-l',contested:'cs-c',illuminate:'cs-i'};
+  const lblMap={terminid:'TERMINIDOS',automaton:'AUTÓMATAS',liberated:'LIBERADO',contested:'DISPUTADO',illuminate:'ILLUMINADOS'};
+  const colorMap={terminid:'#FF6600',automaton:'#CC0000',liberated:'#00CC44',contested:'#FF8C00',illuminate:'#8844FF'};
+  document.getElementById('codex-tbody').innerHTML=data.map(p=>{
+    const pips=Array.from({length:5},(_,i)=>`<div class="tpip3 ${i<p.threat?'on-'+p.status:''}"></div>`).join('');
+    const dot=`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${colorMap[p.status]};margin-right:5px;vertical-align:middle;"></span>`;
+    return `<tr><td class="cn">${p.name}</td><td>${p.sector}</td><td>${dot}<span class="${clsMap[p.status]}">${lblMap[p.status]}</span></td><td><div class="tpips">${pips}</div></td><td>${p.hd} HD</td><td>${p.biome}</td><td>${p.e710}</td></tr>`;
+  }).join('');
+}
+renderCodex();
+
+// ─── LEADERBOARD ───
+const LB_NAMES=[
+  {cs:'"IRON FIST"',id:'HD-0001',planet:'Malevelon Creek'},
+  {cs:'"BONE CRUSHER"',id:'HD-7731',planet:'Fenix Prime'},
+  {cs:'"VOID STALKER"',id:'HD-2204',planet:'Draupnir'},
+  {cs:'"IRON LIBERTY"',id:'HD-4892',planet:'Heeth'},
+  {cs:'"DEATH BLOSSOM"',id:'HD-3319',planet:'Crimsica'},
+  {cs:'"DEMOCRACY NOW"',id:'HD-0042',planet:'Troost'},
+  {cs:'"SHADOW WOLF"',id:'HD-9918',planet:'Menkent'},
+  {cs:'"EAGLE EYE"',id:'HD-5501',planet:'Erata Prime'},
+  {cs:'"HELLFIRE"',id:'HD-6677',planet:'Tibit'},
+  {cs:'"SILENT STORM"',id:'HD-8823',planet:'Martale'},
+  {cs:'"TITAN KILLER"',id:'HD-1144',planet:'Turing'},
+  {cs:'"RED WOLF"',id:'HD-3398',planet:'Ustotu'},
+];
+const MEDALS=['🥇','🥈','🥉','🏅','🎖','🏅','🎖','🏅','🎖','🏅','🎖','🎖'];
+let LB_DATA=LB_NAMES.map((n,i)=>({
+  ...n,kills:Math.floor(400000-i*28000+Math.random()*15000),
+  missions:Math.floor(8000-i*500+Math.random()*400),
+  deaths:Math.floor(200+i*30+Math.random()*100),
+  medal:MEDALS[i],change:['lb-up','lb-dn','lb-eq'][Math.floor(Math.random()*3)]
+}));
+LB_DATA.forEach(p=>p.kdr=(p.kills/Math.max(p.deaths,1)).toFixed(1));
+let lbSort='kills';
+function sortLB(col,btn){
+  lbSort=col;
+  document.querySelectorAll('.lb-sb').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderLB();
+}
+function renderLB(){
+  const sorted=[...LB_DATA].sort((a,b)=>parseFloat(b[lbSort])-parseFloat(a[lbSort]));
+  document.getElementById('lb-body').innerHTML=sorted.map((p,i)=>{
+    const rcls=i===0?'r1':i===1?'r2':i===2?'r3':'';
+    const chg=p.change==='lb-up'?'▲':p.change==='lb-dn'?'▼':'—';
+    return `<div class="lb-row ${rcls}">
+      <div class="lb-rk">${i+1}</div>
+      <div><div class="lb-cs">${p.medal} ${p.cs}</div><div class="lb-id">${p.id} · ${p.planet}</div></div>
+      <div class="lb-k">${p.kills.toLocaleString()}</div>
+      <div class="lb-m">${p.missions.toLocaleString()}</div>
+      <div class="lb-d">${p.deaths.toLocaleString()}</div>
+      <div class="lb-kdr">${p.kdr} <span class="lb-change ${p.change}">${chg}</span></div>
+    </div>`;
+  }).join('');
+}
+// Live updates
+setInterval(()=>{
+  LB_DATA.forEach(p=>{
+    p.kills+=Math.floor(Math.random()*800);
+    p.missions+=Math.floor(Math.random()*3);
+    p.deaths+=Math.floor(Math.random()*2);
+    p.kdr=(p.kills/Math.max(p.deaths,1)).toFixed(1);
+    p.change=['lb-up','lb-dn','lb-eq'][Math.floor(Math.random()*3)];
+  });
+  if(document.getElementById('panel-leaderboard').classList.contains('active')){
+    renderLB();
+    document.getElementById('lb-upd-time').textContent=new Date().toTimeString().slice(0,8);
+  }
+},4000);
+</script>
+</body>
+</html>
